@@ -1,73 +1,112 @@
-# React + TypeScript + Vite
+# MemeDuck Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+K-pop 밈 GIF 업로드 및 공유 웹서비스
 
-Currently, two official plugins are available:
+## 📋 프로젝트 개요
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+영상을 업로드하여 태그를 달고 GIF로 변환하여 K-pop 밈을 업로드, 저장, 태그별 분류하는 웹 애플리케이션입니다.
 
-## React Compiler
+## 🛠️ 기술 스택
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Core
+- **React** `19.1.1` - UI 라이브러리
+- **React DOM** `19.1.1` - React 렌더링
+- **TypeScript** `5.9.3` - 타입 안전성
+- **Vite** `7.1.7` - 빌드 도구 및 개발 서버
 
-## Expanding the ESLint configuration
+### 라우팅 & 상태 관리
+- **React Router DOM** `7.9.5` - 클라이언트 사이드 라우팅
+- **Zustand** `5.0.8` - 경량 전역 상태 관리
+- **TanStack Query (React Query)** `5.90.6` - 서버 상태 관리 및 데이터 캐싱
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 스타일링
+- **TailwindCSS** `4.1.16` - 유틸리티 우선 CSS 프레임워크
+- **@tailwindcss/vite** `4.1.16` - TailwindCSS Vite 플러그인
+- **PostCSS** `8.5.6` - CSS 후처리
+- **Autoprefixer** `10.4.21` - CSS 벤더 접두사 자동 추가
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 미디어 처리
+- **@ffmpeg/ffmpeg** `0.12.15` - 브라우저 내 비디오 → GIF 변환 (WebAssembly)
+- **@ffmpeg/util** `0.12.2` - FFmpeg 유틸리티 함수
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 파일 업로드 & UI
+- **react-dropzone** `14.3.8` - 드래그 앤 드롭 파일 업로드
+- **react-tag-input** `6.10.6` - 태그 입력 컴포넌트
+- **lucide-react** `0.552.0` - 아이콘 라이브러리
+- **react-intersection-observer** `10.0.0` - 무한 스크롤 및 지연 로딩
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 폼 관리
+- **react-hook-form** `7.66.0` - 고성능 폼 상태 관리
+- **zod** `4.1.12` - 스키마 기반 유효성 검증
+- **@hookform/resolvers** `5.2.2` - react-hook-form과 zod 통합
+
+### HTTP 클라이언트
+- **axios** `1.13.1` - HTTP 요청 라이브러리
+
+### 개발 도구
+- **ESLint** `9.36.0` - 코드 린팅
+- **@eslint/js** `9.36.0` - ESLint JavaScript 설정
+- **TypeScript ESLint** `8.45.0` - TypeScript 린팅 규칙
+- **eslint-plugin-react-hooks** `5.2.0` - React Hooks 린팅 규칙
+- **eslint-plugin-react-refresh** `0.4.22` - React Fast Refresh 린팅
+- **@vitejs/plugin-react** `5.0.4` - Vite React 플러그인
+- **globals** `16.4.0` - 전역 변수 정의
+
+### TypeScript 타입 정의
+- **@types/node** `24.6.0` - Node.js 타입
+- **@types/react** `19.1.16` - React 타입
+- **@types/react-dom** `19.1.9` - React DOM 타입
+- **@types/react-tag-input** `6.6.6` - React Tag Input 타입
+
+## 🚀 시작하기
+
+### 설치
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 개발 서버 실행
+```bash
+npm run dev
 ```
+
+### 빌드
+```bash
+npm run build
+```
+
+### 프리뷰
+```bash
+npm run preview
+```
+
+### 린트
+```bash
+npm run lint
+```
+
+## 📁 프로젝트 구조
+
+```
+md_frontend/
+├── src/
+│   ├── api/          # API 호출 함수
+│   ├── assets/       # 정적 리소스
+│   ├── components/   # 재사용 가능한 컴포넌트
+│   ├── pages/        # 페이지 컴포넌트
+│   ├── store/        # Zustand 스토어
+│   ├── types/        # TypeScript 타입 정의
+│   ├── App.tsx       # 루트 컴포넌트
+│   └── main.tsx      # 엔트리 포인트
+├── public/           # 정적 파일
+└── package.json
+```
+
+## 🎯 주요 기능
+
+- ✅ 비디오 파일 드래그 앤 드롭 업로드
+- ✅ 브라우저 내 비디오 → GIF 변환
+- ✅ 태그 기반 밈 분류 및 검색
+- ✅ 무한 스크롤 피드
+- ✅ 반응형 UI (모바일/데스크톱)
+- ✅ 타입 안전한 폼 유효성 검증
