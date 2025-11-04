@@ -1,4 +1,4 @@
-import { type ReactNode, Children, useState, useEffect, useRef } from 'react';
+import { type ReactNode, Children, useState, useEffect, useRef, useMemo } from 'react';
 import { Box } from '@mui/material';
 
 interface MasonryGridProps {
@@ -9,26 +9,31 @@ interface MasonryGridProps {
 
 const MasonryGrid = ({ 
   children, 
-  columnCount = { xs: 1, sm: 2, md: 3, lg: 4 },
+  columnCount = { xs: 2, sm: 2, md: 3, lg: 4 },
   gap = 16 
 }: MasonryGridProps) => {
   const [columns, setColumns] = useState<ReactNode[][]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // children 배열을 메모이제이션
+  const childArray = useMemo(() => Children.toArray(children), [children]);
+  
+  // columnCount 값들을 개별 의존성으로 추출
+  const { xs, sm, md, lg } = columnCount;
+
   // 반응형 컬럼 개수 계산
   const getColumnCount = () => {
-    if (typeof window === 'undefined') return columnCount.lg;
+    if (typeof window === 'undefined') return lg;
     const width = window.innerWidth;
-    if (width < 600) return columnCount.xs;
-    if (width < 900) return columnCount.sm;
-    if (width < 1200) return columnCount.md;
-    return columnCount.lg;
+    if (width < 600) return xs;
+    if (width < 900) return sm;
+    if (width < 1200) return md;
+    return lg;
   };
 
   useEffect(() => {
     const distributeItems = () => {
       const cols = getColumnCount();
-      const childArray = Children.toArray(children);
       
       // 각 컬럼을 빈 배열로 초기화
       const newColumns: ReactNode[][] = Array.from({ length: cols }, () => []);
@@ -59,7 +64,7 @@ const MasonryGrid = ({
     window.addEventListener('resize', handleResize);
     
     return () => window.removeEventListener('resize', handleResize);
-  }, [children, columnCount]);
+  }, [childArray, xs, sm, md, lg]);
 
   return (
     <Box

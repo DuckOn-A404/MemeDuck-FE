@@ -78,8 +78,10 @@ const HomePage = () => {
   }, [allMemes.length, isLoading, hasMore]);
 
   // Intersection Observer로 스크롤 감지
+  // rootMargin을 사용해 화면 하단 800px 전에 미리 로드
   const { ref: loadMoreRef } = useInView({
     threshold: 0,
+    rootMargin: '800px',  // 화면 하단 800px 전에 트리거
     onChange: (inView) => {
       if (inView && hasMore && !isLoading) {
         loadMoreMemes();
@@ -96,7 +98,14 @@ const HomePage = () => {
     <Box sx={{ minHeight: '100vh', bgcolor: '#FAFAFA' }}>
       <Header />
       
-      <Container maxWidth="xl" sx={{ py: 6 }}>
+      <Container 
+        maxWidth={false} 
+        sx={{ 
+          py: 6,
+          px: { xs: '5%', sm: '8%', md: '10%' },
+          maxWidth: '100%'
+        }}
+      >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {/* 인기 태그 섹션 */}
           <PopularTags tags={popularTags} onTagClick={handleTagClick} />
