@@ -110,3 +110,22 @@ md_frontend/
 - ✅ 무한 스크롤 피드
 - ✅ 반응형 UI (모바일/데스크톱)
 - ✅ 타입 안전한 폼 유효성 검증
+
+md_frontend/
+├── public/
+│   └── ffmpeg/              ✅ .gitkeep
+│
+├── src/
+│   ├── api/                 ✅ .gitkeep (기존)
+│   ├── assets/              (파일 있음)
+│   ├── components/
+│   │   ├── common/          ✅ .gitkeep
+│   │   ├── layout/          ✅ .gitkeep
+│   │   ├── meme/            ✅ .gitkeep
+│   │   ├── upload/          ✅ .gitkeep
+│   │   └── tag/             ✅ .gitkeep
+│   ├── hooks/               ✅ .gitkeep
+│   ├── pages/               ✅ .gitkeep (기존)
+│   ├── store/               (파일 있음)
+│   ├── types/               ✅ .gitkeep (기존)
+│   └── utils/               ✅ .gitkeep
