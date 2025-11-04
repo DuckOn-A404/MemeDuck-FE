@@ -96,7 +96,7 @@ const HomePage = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#FAFAFA' }}>
-      <Header />
+      <Header showSearchBar />
       
       <Container 
         maxWidth={false} 
