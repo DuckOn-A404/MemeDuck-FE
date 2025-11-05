@@ -50,6 +50,7 @@ const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
         '&:hover': {
           transform: 'translateY(-8px)',
           boxShadow: '0 12px 24px rgba(16, 185, 129, 0.25)',
+          borderRadius: 0,
         },
       }}
     >
