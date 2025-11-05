@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, Menu, MenuItem, ListItemIcon, ListItemText, Divider, InputBase } from '@mui/material';
 import { Upload, User, UserCircle, LogOut, Search } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, LayoutGroup } from 'framer-motion';
 
 interface HeaderProps {
@@ -15,6 +15,7 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
   const [searchFocused, setSearchFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!showSearchBar) return;
@@ -38,6 +39,14 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
       }, 0);
     }
   }, [isScrolled, searchFocused, showSearchBar]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      navigate(`/search/${encodeURIComponent(q)}`);
+    }
+  };
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -117,6 +126,8 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
               style={{ flexGrow: 1, maxWidth: '600px' }}
             >
               <Box
+                component="form"
+                onSubmit={handleSearchSubmit}
                 sx={{
                   position: 'relative',
                   display: 'flex',
@@ -160,6 +171,12 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setSearchFocused(false)}
                   inputRef={inputRef}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      // 강제 제출
+                      handleSearchSubmit(e as any);
+                    }
+                  }}
                 />
               </Box>
             </motion.div>
@@ -271,6 +288,8 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
                     style={{ marginTop: 24 }}
                   >
                     <Box
+                      component="form"
+                      onSubmit={handleSearchSubmit}
                       sx={{
                         position: 'relative',
                         display: 'flex',
@@ -315,6 +334,12 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
                         onFocus={() => setSearchFocused(true)}
                         onBlur={() => setSearchFocused(false)}
                         inputRef={inputRef}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            // 강제 제출
+                            handleSearchSubmit(e as any);
+                          }
+                        }}
                       />
                     </Box>
                   </motion.div>
