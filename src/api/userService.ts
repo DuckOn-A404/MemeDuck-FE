@@ -1,0 +1,47 @@
+import { api } from "./axiosInstance";
+import type { MyUser, OtherUser } from "../types/mypage";
+
+// 현재 사용자 정보 조회
+export const fetchMyProfile = async (): Promise<MyUser> => {
+  const response = await api.get<MyUser>("/users/me");
+  return response.data;
+};
+
+// 타 유저 정보 조회
+export const fetchOtherUserProfile = async (
+  userId: string
+): Promise<OtherUser> => {
+  const response = await api.get<OtherUser>(`/users/${userId}`);
+  return response.data;
+};
+
+// 비밀번호 검증 (일반 로그인 계정)
+export const verifyPassword = async (password: string): Promise<boolean> => {
+  const res = await api.post<{ valid: boolean }>("/users/me/verify-password", { password });
+  return res.data?.valid === true;
+};
+
+// 사용자 프로필 업데이트 (변경된 값만 전송, 파일은 선택했을 때만)
+export const updateUserProfile = async (formData: FormData): Promise<MyUser> => {
+  const fd = new FormData();
+
+  for (const [key, value] of formData.entries()) {
+    if (key === "profileImg") {
+      if (value instanceof File && value.size > 0) {
+        fd.append("profileImg", value);
+      }
+      continue; // 비어있으면 전송 안 함
+    }
+
+    if (typeof value === "string") {
+      const v = value.trim();
+      if (v !== "") fd.append(key, v);
+      continue;
+    }
+
+    fd.append(key, value as any);
+  }
+
+  const res = await api.patch<MyUser>("/users/me", fd);
+  return res.data;
+};

@@ -10,7 +10,7 @@ const PopularTags = ({ tags, onTagClick }: PopularTagsProps) => {
   return (
     <Box sx={{ py: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-        <Hash size={20} strokeWidth={2.5} color="#10B981" />
+        <Hash size={20} strokeWidth={2.5} color="#9333EA" />
         <Typography 
           variant="h6" 
           fontWeight={700} 
@@ -33,8 +33,9 @@ const PopularTags = ({ tags, onTagClick }: PopularTagsProps) => {
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               '&:hover': {
-                background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
-                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
+                boxShadow: '0 4px 12px rgba(147, 51, 234, 0.3)',
+                transform: 'translateY(-2px)',
                 '& .tag-text': {
                   color: 'white',
                 },

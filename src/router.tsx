@@ -3,6 +3,10 @@ import HomePage from './pages/HomePage';
 import UploadPage from './pages/UploadPage';
 import MyPage from './pages/MyPage';
 import SearchResultPage from './pages/SearchResultPage';
+import MemeDetailPage from './pages/MemeDetailPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler';
 
 export const router = createBrowserRouter([
   {
@@ -21,10 +25,22 @@ export const router = createBrowserRouter([
     path: '/search/:query',
     element: <SearchResultPage />,
   },
-  // {
-  //   path: '/meme/:id',
-  //   element: <MemeDetailPage />,
-  // },
+  {
+    path: '/memes/:id',
+    element: <MemeDetailPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/signup',
+    element: <SignupPage />,
+  },
+  {
+    path: '/oauth2/redirect',
+    element: <OAuth2RedirectHandler />,
+  },
   // {
   //   path: '/tag/:tagName',
   //   element: <TagPage />,

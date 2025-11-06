@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Container, Box, Typography, CircularProgress } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import Header from '../components/layout/Header';
@@ -6,8 +6,29 @@ import MemeCard from '../components/meme/MemeCard';
 import MasonryGrid from '../components/meme/MasonryGrid';
 import PopularTags from '../components/tag/PopularTags';
 import { Flame, Sparkles } from 'lucide-react';
+import { useUserStore } from '../store/useUserStore';
+import { getAccessToken } from '../api/axiosInstance';
 
 const HomePage = () => {
+  const { myUser, setMyUser } = useUserStore();
+
+  // 페이지 로드 시 토큰이 있으면 사용자 정보 로드
+  useEffect(() => {
+    const loadUserIfLoggedIn = async () => {
+      const token = getAccessToken();
+      if (token && !myUser) {
+        try {
+          const { fetchMyProfile } = await import('../api/userService');
+          const userData = await fetchMyProfile();
+          setMyUser(userData);
+        } catch (error) {
+          console.error('사용자 정보 로드 실패:', error);
+        }
+      }
+    };
+    loadUserIfLoggedIn();
+  }, [myUser, setMyUser]);
+
   // 실제 GIF URL 사용
   const gifUrls = [
     'https://media1.tenor.com/m/elCp2_fukbwAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
@@ -115,12 +136,12 @@ const HomePage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
               <Box
                 sx={{
-                  background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
-                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
+                  borderRadius: 3,
                   p: 1.5,
                   display: 'flex',
                   alignItems: 'center',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  boxShadow: '0 6px 20px rgba(147, 51, 234, 0.4)',
                 }}
               >
                 <Flame size={28} color="white" />
@@ -129,7 +150,7 @@ const HomePage = () => {
                 variant="h4" 
                 fontWeight={800}
                 sx={{
-                  background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+                  background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
@@ -150,12 +171,12 @@ const HomePage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
               <Box
                 sx={{
-                  background: 'linear-gradient(135deg, #059669 0%, #0D9488 100%)',
-                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)',
+                  borderRadius: 3,
                   p: 1.5,
                   display: 'flex',
                   alignItems: 'center',
-                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
+                  boxShadow: '0 6px 20px rgba(124, 58, 237, 0.4)',
                 }}
               >
                 <Sparkles size={28} color="white" />
@@ -164,7 +185,7 @@ const HomePage = () => {
                 variant="h4" 
                 fontWeight={800}
                 sx={{
-                  background: 'linear-gradient(135deg, #059669 0%, #0D9488 100%)',
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
@@ -196,7 +217,7 @@ const HomePage = () => {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   }}
                 >
-                  <CircularProgress size={20} sx={{ color: '#10B981' }} />
+                  <CircularProgress size={20} sx={{ color: '#9333EA' }} />
                   <Typography variant="body2" fontWeight={600} color="text.secondary">
                     더 많은 밈 불러오는 중...
                   </Typography>

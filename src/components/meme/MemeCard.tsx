@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardMedia, Chip, IconButton, Box, Fade } from '@mui/material';
 import { Download } from 'lucide-react';
 
@@ -12,6 +13,7 @@ interface MemeCardProps {
 }
 
 const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
+  const navigate = useNavigate();
   const [hover, setHover] = useState(false);
 
   const handleDownload = async (e: React.MouseEvent) => {
@@ -35,8 +37,13 @@ const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
     }
   };
 
+  const handleCardClick = () => {
+    navigate(`/memes/${id}`);
+  };
+
   return (
     <Card
+      onClick={handleCardClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       sx={{
@@ -49,7 +56,7 @@ const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           transform: 'translateY(-8px)',
-          boxShadow: '0 12px 24px rgba(16, 185, 129, 0.25)',
+          boxShadow: '0 12px 32px rgba(147, 51, 234, 0.3)',
           borderRadius: 0,
         },
       }}
@@ -87,12 +94,12 @@ const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
               position: 'absolute',
               top: 12,
               right: 12,
-              bgcolor: 'rgba(16, 185, 129, 0.95)',
+              bgcolor: 'rgba(147, 51, 234, 0.95)',
               backdropFilter: 'blur(10px)',
               '&:hover': {
-                bgcolor: '#10B981',
+                bgcolor: '#9333EA',
                 transform: 'scale(1.1)',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                boxShadow: '0 4px 16px rgba(147, 51, 234, 0.5)',
               },
             }}
           >
@@ -128,10 +135,12 @@ const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
                   backdropFilter: 'blur(10px)',
                   fontWeight: 600,
                   fontSize: '0.75rem',
-                  color: '#10B981',
+                  color: '#9333EA',
+                  border: '1px solid rgba(147, 51, 234, 0.2)',
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+                    background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
                     color: 'white',
+                    borderColor: 'transparent',
                   },
                 }}
               />

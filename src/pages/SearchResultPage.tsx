@@ -66,12 +66,12 @@ const SearchResultPage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
               <Box
                 sx={{
-                  background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
-                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
+                  borderRadius: 3,
                   p: 1.5,
                   display: 'flex',
                   alignItems: 'center',
-                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  boxShadow: '0 6px 20px rgba(147, 51, 234, 0.4)',
                 }}
               >
                 <SearchIcon size={28} color="white" />
@@ -81,7 +81,7 @@ const SearchResultPage = () => {
                   variant="h4" 
                   fontWeight={800}
                   sx={{
-                    background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+                    background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
@@ -95,10 +95,11 @@ const SearchResultPage = () => {
                   <Chip
                     label={query || ''}
                     sx={{
-                      bgcolor: 'rgba(16, 185, 129, 0.1)',
-                      color: '#059669',
+                      bgcolor: 'rgba(147, 51, 234, 0.1)',
+                      color: '#9333EA',
                       fontWeight: 700,
                       fontSize: '0.875rem',
+                      border: '1px solid rgba(147, 51, 234, 0.2)',
                     }}
                   />
                   <Typography variant="body2" color="text.secondary">

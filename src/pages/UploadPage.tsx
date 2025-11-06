@@ -14,6 +14,10 @@ import {
   Card,
   CardContent,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Upload,
@@ -25,6 +29,7 @@ import {
   Info,
 } from 'lucide-react';
 import Header from '../components/layout/Header';
+import { useUserStore } from '../store/useUserStore';
 
 interface UploadedFile {
   id: string;
@@ -38,9 +43,11 @@ interface UploadedFile {
 
 const UploadPage = () => {
   const navigate = useNavigate();
+  const { myUser } = useUserStore();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentGuideStep, setCurrentGuideStep] = useState(0);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
 
   // 드래그 앤 드롭 설정
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -150,6 +157,12 @@ const UploadPage = () => {
 
   // 제출
   const handleSubmit = async () => {
+    // 로그인 체크
+    if (!myUser) {
+      setShowLoginAlert(true);
+      return;
+    }
+
     // 모든 파일이 최소 1개의 태그를 가지고 있는지 확인
     const allFilesHaveTags = uploadedFiles.every(f => f.tags.length > 0);
     if (uploadedFiles.length === 0 || !allFilesHaveTags) return;
@@ -161,6 +174,16 @@ const UploadPage = () => {
       setIsSubmitting(false);
       navigate('/');
     }, 2000);
+  };
+
+  // 로그인 알림 닫기
+  const handleCloseLoginAlert = () => {
+    setShowLoginAlert(false);
+  };
+
+  // 로그인 페이지로 이동
+  const handleGoToLogin = () => {
+    navigate('/login');
   };
 
   // 가이드 스텝 데이터
@@ -207,11 +230,11 @@ const UploadPage = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Box
               sx={{
-                background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+                background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
                 borderRadius: 3,
                 p: 2,
                 display: 'inline-flex',
-                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)',
+                boxShadow: '0 8px 24px rgba(147, 51, 234, 0.3)',
               }}
             >
               <Sparkles size={40} color="white" />
@@ -221,7 +244,7 @@ const UploadPage = () => {
             variant="h3" 
             fontWeight={800}
             sx={{
-              background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+              background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               mb: 1,
@@ -256,7 +279,7 @@ const UploadPage = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   border: '2px dashed',
-                  borderColor: isDragActive ? '#10B981' : '#D1D5DB',
+                  borderColor: isDragActive ? '#9333EA' : '#D1D5DB',
                   bgcolor: isDragActive ? 'rgba(16, 185, 129, 0.05)' : 'white',
                   borderRadius: 3,
                   cursor: 'pointer',
@@ -264,7 +287,7 @@ const UploadPage = () => {
                   textAlign: 'center',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   '&:hover': {
-                    borderColor: '#10B981',
+                    borderColor: '#9333EA',
                     bgcolor: 'rgba(16, 185, 129, 0.02)',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   },
@@ -276,11 +299,11 @@ const UploadPage = () => {
                     display: 'inline-flex',
                     p: 3,
                     borderRadius: 3,
-                    bgcolor: 'rgba(16, 185, 129, 0.1)',
+                    bgcolor: 'rgba(147, 51, 234, 0.1)',
                     mb: 3,
                   }}
                 >
-                  <Upload size={48} color="#10B981" />
+                  <Upload size={48} color="#9333EA" />
                 </Box>
                 <Typography variant="h5" fontWeight={700} gutterBottom>
                   {isDragActive ? '여기에 놓아주세요' : '파일을 드래그하거나 클릭하세요'}
@@ -310,7 +333,7 @@ const UploadPage = () => {
                       {/* 왼쪽: 밈 미리보기 */}
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" fontWeight={700} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                          <FileVideo size={24} color="#10B981" />
+                          <FileVideo size={24} color="#9333EA" />
                           밈 #{index + 1}
                         </Typography>
                         
@@ -377,7 +400,7 @@ const UploadPage = () => {
                                     borderRadius: 2,
                                     bgcolor: '#E5E7EB',
                                     '& .MuiLinearProgress-bar': {
-                                      bgcolor: '#10B981',
+                                      bgcolor: '#9333EA',
                                       borderRadius: 2,
                                     },
                                   }}
@@ -387,8 +410,8 @@ const UploadPage = () => {
 
                             {file.status === 'success' && (
                               <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <CheckCircle2 size={14} color="#10B981" />
-                                <Typography variant="caption" color="#10B981" fontWeight={600}>
+                                <CheckCircle2 size={14} color="#9333EA" />
+                                <Typography variant="caption" color="#9333EA" fontWeight={600}>
                                   업로드 완료
                                 </Typography>
                               </Box>
@@ -400,7 +423,7 @@ const UploadPage = () => {
                       {/* 오른쪽: 태그 입력 */}
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" fontWeight={700} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                          <Tag size={24} color="#10B981" />
+                          <Tag size={24} color="#9333EA" />
                           태그 입력 {file.tags.length === 0 && <Typography component="span" variant="caption" color="error">(필수)</Typography>}
                         </Typography>
                         
@@ -418,7 +441,7 @@ const UploadPage = () => {
                                 '& .MuiOutlinedInput-root': {
                                   borderRadius: 2,
                                   '&.Mui-focused fieldset': {
-                                    borderColor: '#10B981',
+                                    borderColor: '#9333EA',
                                   },
                                 },
                               }}
@@ -429,12 +452,12 @@ const UploadPage = () => {
                               onClick={() => addTag(file.id)}
                               disabled={!file.tagInput.trim() || file.tags.length >= 10}
                               sx={{
-                                bgcolor: '#10B981',
+                                bgcolor: '#9333EA',
                                 borderRadius: 2,
                                 px: 2,
                                 minWidth: 'auto',
                                 '&:hover': {
-                                  bgcolor: '#059669',
+                                  bgcolor: '#7C3AED',
                                 },
                               }}
                             >
@@ -452,8 +475,8 @@ const UploadPage = () => {
                                   size="medium"
                                   onDelete={() => removeTag(file.id, tag)}
                                   sx={{
-                                    bgcolor: 'rgba(16, 185, 129, 0.1)',
-                                    color: '#059669',
+                                    bgcolor: 'rgba(147, 51, 234, 0.1)',
+                                    color: '#9333EA',
                                     fontWeight: 700,
                                     fontSize: '0.9rem',
                                     height: 36,
@@ -462,10 +485,10 @@ const UploadPage = () => {
                                       px: 2,
                                     },
                                     '& .MuiChip-deleteIcon': {
-                                      color: '#059669',
+                                      color: '#9333EA',
                                       fontSize: '20px',
                                       '&:hover': {
-                                        color: '#047857',
+                                        color: '#7C3AED',
                                       },
                                     },
                                   }}
@@ -494,18 +517,18 @@ const UploadPage = () => {
                       textAlign: 'center',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      bgcolor: isDragActive ? 'rgba(16, 185, 129, 0.05)' : 'white',
+                      bgcolor: isDragActive ? 'rgba(147, 51, 234, 0.05)' : 'white',
                       boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                       '&:hover': {
-                        borderColor: '#10B981',
-                        bgcolor: 'rgba(16, 185, 129, 0.02)',
+                        borderColor: '#9333EA',
+                        bgcolor: 'rgba(147, 51, 234, 0.02)',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                       },
                     }}
                   >
                     <input {...getInputProps()} />
-                    <Upload size={40} color="#10B981" style={{ marginBottom: 12 }} />
-                    <Typography variant="h6" fontWeight={700} color="#10B981" gutterBottom>
+                    <Upload size={40} color="#9333EA" style={{ marginBottom: 12 }} />
+                    <Typography variant="h6" fontWeight={700} color="#9333EA" gutterBottom>
                       + 추가 업로드
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -532,7 +555,7 @@ const UploadPage = () => {
                 {/* 카드뉴스 헤더 */}
                 <Box sx={{ p: 2.5, borderBottom: '1px solid #F3F4F6' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Info size={24} color="#10B981" />
+                    <Info size={24} color="#9333EA" />
                     <Typography variant="h6" fontWeight={700}>
                       업로드 가이드
                     </Typography>
@@ -545,7 +568,7 @@ const UploadPage = () => {
                         sx={{
                           width: `${100 / guideSteps.length}%`,
                           height: 3,
-                          bgcolor: index === currentGuideStep ? '#10B981' : '#E5E7EB',
+                          bgcolor: index === currentGuideStep ? '#9333EA' : '#E5E7EB',
                           borderRadius: 1,
                           transition: 'all 0.3s ease',
                         }}
@@ -619,11 +642,11 @@ const UploadPage = () => {
                         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        border: '2px solid #10B981',
+                        border: '2px solid #9333EA',
                         '&:hover': {
-                          bgcolor: '#10B981',
+                          bgcolor: '#9333EA',
                           transform: 'translateY(-50%) scale(1.1)',
-                          boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
+                          boxShadow: '0 6px 16px rgba(147, 51, 234, 0.4)',
                           '& svg': {
                             color: 'white',
                           },
@@ -633,7 +656,7 @@ const UploadPage = () => {
                         },
                       }}
                     >
-                      <Box component="svg" width="24" height="24" viewBox="0 0 24 24" fill="none" sx={{ color: '#10B981', transition: 'color 0.2s ease' }}>
+                      <Box component="svg" width="24" height="24" viewBox="0 0 24 24" fill="none" sx={{ color: '#9333EA', transition: 'color 0.2s ease' }}>
                         <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                       </Box>
                     </Box>
@@ -656,11 +679,11 @@ const UploadPage = () => {
                         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        border: '2px solid #10B981',
+                        border: '2px solid #9333EA',
                         '&:hover': {
-                          bgcolor: '#10B981',
+                          bgcolor: '#9333EA',
                           transform: 'translateY(-50%) scale(1.1)',
-                          boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
+                          boxShadow: '0 6px 16px rgba(147, 51, 234, 0.4)',
                           '& svg': {
                             color: 'white',
                           },
@@ -670,7 +693,7 @@ const UploadPage = () => {
                         },
                       }}
                     >
-                      <Box component="svg" width="24" height="24" viewBox="0 0 24 24" fill="none" sx={{ color: '#10B981', transition: 'color 0.2s ease' }}>
+                      <Box component="svg" width="24" height="24" viewBox="0 0 24 24" fill="none" sx={{ color: '#9333EA', transition: 'color 0.2s ease' }}>
                         <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                       </Box>
                     </Box>
@@ -688,13 +711,13 @@ const UploadPage = () => {
                     sx={{
                       py: 1.5,
                       borderRadius: 2,
-                      bgcolor: '#10B981',
+                      bgcolor: '#9333EA',
                       fontSize: '1.1rem',
                       fontWeight: 700,
-                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                      boxShadow: '0 4px 12px rgba(147, 51, 234, 0.3)',
                       '&:hover': {
-                        bgcolor: '#059669',
-                        boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
+                        bgcolor: '#7C3AED',
+                        boxShadow: '0 6px 16px rgba(147, 51, 234, 0.4)',
                       },
                       '&:disabled': {
                         bgcolor: '#D1D5DB',
@@ -716,8 +739,8 @@ const UploadPage = () => {
                         width: 32,
                         height: 32,
                         borderRadius: 2,
-                        bgcolor: 'rgba(16, 185, 129, 0.1)',
-                        color: '#10B981',
+                        bgcolor: 'rgba(147, 51, 234, 0.1)',
+                        color: '#9333EA',
                         fontWeight: 700,
                         mb: 1,
                       }}
@@ -744,8 +767,8 @@ const UploadPage = () => {
                         width: 32,
                         height: 32,
                         borderRadius: 2,
-                        bgcolor: 'rgba(16, 185, 129, 0.1)',
-                        color: '#10B981',
+                        bgcolor: 'rgba(147, 51, 234, 0.1)',
+                        color: '#9333EA',
                         fontWeight: 700,
                         mb: 1,
                       }}
@@ -772,8 +795,8 @@ const UploadPage = () => {
                         width: 32,
                         height: 32,
                         borderRadius: 2,
-                        bgcolor: 'rgba(16, 185, 129, 0.1)',
-                        color: '#10B981',
+                        bgcolor: 'rgba(147, 51, 234, 0.1)',
+                        color: '#9333EA',
                         fontWeight: 700,
                         mb: 1,
                       }}
@@ -800,8 +823,8 @@ const UploadPage = () => {
                         width: 32,
                         height: 32,
                         borderRadius: 2,
-                        bgcolor: 'rgba(16, 185, 129, 0.1)',
-                        color: '#10B981',
+                        bgcolor: 'rgba(147, 51, 234, 0.1)',
+                        color: '#9333EA',
                         fontWeight: 700,
                         mb: 1,
                       }}
@@ -821,6 +844,46 @@ const UploadPage = () => {
           </Box>
         </Box>
       </Container>
+
+      {/* 로그인 필요 알림 Dialog */}
+      <Dialog
+        open={showLoginAlert}
+        onClose={handleCloseLoginAlert}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 700, textAlign: 'center' }}>
+          로그인이 필요합니다
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+            밈을 업로드하려면 로그인이 필요합니다.
+            <br />
+            로그인 페이지로 이동하시겠습니까?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1, justifyContent: 'center' }}>
+          <Button
+            onClick={handleCloseLoginAlert}
+            sx={{
+              color: '#6B7280',
+              '&:hover': { bgcolor: '#F9FAFB' },
+            }}
+          >
+            취소
+          </Button>
+          <Button
+            onClick={handleGoToLogin}
+            variant="contained"
+            sx={{
+              bgcolor: '#9333EA',
+              '&:hover': { bgcolor: '#7C3AED' },
+            }}
+          >
+            로그인하기
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

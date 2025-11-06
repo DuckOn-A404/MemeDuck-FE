@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -8,7 +8,6 @@ import {
   Button,
   Card,
   CardContent,
-  TextField,
   IconButton,
   Dialog,
   DialogTitle,
@@ -21,9 +20,6 @@ import {
   MenuItem,
 } from '@mui/material';
 import {
-  Camera,
-  Save,
-  X,
   Heart,
   Upload,
   MoreVertical,
@@ -31,6 +27,11 @@ import {
 import Header from '../components/layout/Header';
 import MasonryGrid from '../components/meme/MasonryGrid';
 import MemeCard from '../components/meme/MemeCard';
+import { useUserStore } from '../store/useUserStore';
+import PasswordConfirm from '../components/common/PasswordConfirm';
+import EditProfileCard from '../components/domain/user/EditProfileCard';
+import { verifyPassword } from '../api/userService';
+import type { MyUser } from '../types/mypage';
 
 // 임시 사용자 타입
 interface User {
@@ -56,17 +57,40 @@ interface Meme {
 
 const MyPage = () => {
   const navigate = useNavigate();
+  const { myUser } = useUserStore();
+
+  // 로그인 체크 - 비로그인 시 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!myUser) {
+      navigate('/login');
+    }
+  }, [myUser, navigate]);
   
-  // 임시 사용자 데이터 (실제로는 API에서 가져옴)
+  // 실제 사용자 데이터를 store에서 가져와 사용
   const [user, setUser] = useState<User>({
-    id: '1',
-    userId: 'memelover123',
-    nickname: 'MemeLover',
-    email: 'memelover@example.com',
-    profileImage: '',
-    uploadedMemesCount: 24,
-    likedMemesCount: 15,
+    id: myUser?.userId || '',
+    userId: myUser?.userId || '',
+    nickname: myUser?.nickname || '',
+    email: myUser?.email || '',
+    profileImage: myUser?.imgUrl || '',
+    uploadedMemesCount: 0, // API에서 가져와야 함
+    likedMemesCount: 0, // API에서 가져와야 함
   });
+
+  // myUser가 변경되면 user 상태도 업데이트
+  useEffect(() => {
+    if (myUser) {
+      setUser({
+        id: myUser.userId,
+        userId: myUser.userId,
+        nickname: myUser.nickname,
+        email: myUser.email,
+        profileImage: myUser.imgUrl || '',
+        uploadedMemesCount: 0, // API에서 가져와야 함
+        likedMemesCount: 0, // API에서 가져와야 함
+      });
+    }
+  }, [myUser]);
 
   // HomePage에서 사용하는 GIF URL 샘플과 동일하게 사용
   const gifUrls = [
@@ -141,10 +165,11 @@ const MyPage = () => {
   ]);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editedUser, setEditedUser] = useState(user);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const isSocial = Boolean((myUser as any)?.socialLogin);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -158,20 +183,19 @@ const MyPage = () => {
     setCurrentTab(newValue);
   };
 
-  const handleEditToggle = () => {
-    if (isEditing) {
-      // 저장
-      setUser(editedUser);
-      // 실제로는 API 호출
-    } else {
-      setEditedUser(user);
+  // 비밀번호 확인 후 편집 진입 (일반 로그인 전용)
+  const handlePasswordConfirm = async (password: string): Promise<boolean> => {
+    try {
+      const ok = await verifyPassword(password);
+      if (ok) {
+        setShowPasswordModal(false);
+        setIsEditing(true);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
     }
-    setIsEditing(!isEditing);
-  };
-
-  const handleCancel = () => {
-    setEditedUser(user);
-    setIsEditing(false);
   };
 
   const handleDeleteAccount = () => {
@@ -181,208 +205,148 @@ const MyPage = () => {
     navigate('/');
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditedUser({ ...editedUser, profileImage: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#FAFAFA' }}>
       <Header />
       
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* 프로필 카드 */}
-        <Card
-          sx={{
-            borderRadius: 3,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            mb: 4,
-          }}
-        >
-          <CardContent sx={{ p: 4 }}>
-            <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', md: 'row' } }}>
-              {/* 프로필 이미지 */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ position: 'relative' }}>
-                  <Avatar
-                    src={isEditing ? editedUser.profileImage : user.profileImage}
-                    sx={{
-                      width: 120,
-                      height: 120,
-                      bgcolor: '#10B981',
-                      fontSize: '2.5rem',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {(isEditing ? editedUser.nickname : user.nickname).charAt(0).toUpperCase()}
-                  </Avatar>
-                  {isEditing && (
-                    <IconButton
-                      component="label"
+        {isEditing && myUser ? (
+          <EditProfileCard
+            user={myUser as MyUser}
+            onCancel={() => setIsEditing(false)}
+            onUpdate={(updated) => {
+              // 로컬 표시용 user 동기화
+              setUser((prev) => ({
+                ...prev,
+                userId: (updated as any).userId,
+                nickname: (updated as any).nickname,
+                email: (updated as any).email,
+                profileImage: (updated as any).imgUrl || '',
+              }));
+              setIsEditing(false);
+            }}
+          />
+        ) : (
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              mb: 4,
+            }}
+          >
+            <CardContent sx={{ p: 4 }}>
+              <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', md: 'row' } }}>
+                {/* 프로필 이미지 */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ position: 'relative' }}>
+                    <Avatar
+                      src={user.profileImage}
                       sx={{
-                        position: 'absolute',
-                        bottom: 0,
-                        right: 0,
-                        bgcolor: '#10B981',
-                        color: 'white',
-                        '&:hover': {
-                          bgcolor: '#059669',
-                        },
+                        width: 120,
+                        height: 120,
+                        bgcolor: '#9333EA',
+                        fontSize: '2.5rem',
+                        fontWeight: 700,
                       }}
                     >
-                      <Camera size={20} />
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                      />
-                    </IconButton>
-                  )}
-                </Box>
-                
-                {!isEditing && (
+                      {user.nickname.charAt(0).toUpperCase()}
+                    </Avatar>
+                  </Box>
                   <Chip
                     label={`업로드한 밈 ${user.uploadedMemesCount}개`}
                     sx={{
-                      bgcolor: 'rgba(16, 185, 129, 0.1)',
-                      color: '#059669',
+                      bgcolor: 'rgba(147, 51, 234, 0.1)',
+                      color: '#9333EA',
                       fontWeight: 700,
                     }}
                   />
-                )}
-              </Box>
+                </Box>
 
-              {/* 프로필 정보 */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                  <Typography variant="h5" fontWeight={700}>
-                    프로필 정보
-                  </Typography>
+                {/* 프로필 정보 */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                    <Typography variant="h5" fontWeight={700}>
+                      프로필 정보
+                    </Typography>
 
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    {!isEditing && (
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       <Button
                         variant="text"
                         size="small"
-                        onClick={handleEditToggle}
+                        onClick={() => {
+                          if (isSocial) setIsEditing(true);
+                          else setShowPasswordModal(true);
+                        }}
                         sx={{
-                          color: '#10B981',
+                          color: '#9333EA',
                           fontSize: '0.875rem',
                           '&:hover': {
-                            bgcolor: 'rgba(16, 185, 129, 0.05)',
+                            bgcolor: 'rgba(147, 51, 234, 0.08)',
                           },
                         }}
                       >
                         프로필 수정
                       </Button>
-                    )}
-                    <IconButton
-                      size="small"
-                      onClick={handleMenuOpen}
-                      sx={{
-                        color: '#6B7280',
-                      }}
-                    >
-                      <MoreVertical size={20} />
-                    </IconButton>
-                    <Menu
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl)}
-                      onClose={handleMenuClose}
-                    >
-                      <MenuItem
-                        onClick={() => {
-                          handleMenuClose();
-                          setShowDeleteDialog(true);
+                      <IconButton
+                        size="small"
+                        onClick={handleMenuOpen}
+                        sx={{
+                          color: '#6B7280',
                         }}
-                        sx={{ color: '#EF4444', fontSize: '0.875rem' }}
                       >
-                        회원탈퇴
-                      </MenuItem>
-                    </Menu>
+                        <MoreVertical size={20} />
+                      </IconButton>
+                      <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                      >
+                        <MenuItem
+                          onClick={() => {
+                            handleMenuClose();
+                            setShowDeleteDialog(true);
+                          }}
+                          sx={{ color: '#EF4444', fontSize: '0.875rem' }}
+                        >
+                          회원탈퇴
+                        </MenuItem>
+                      </Menu>
+                    </Box>
+                  </Box>
+
+                  {/* 프로필 정보 항목 (읽기 전용) */}
+                  <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>
+                        이메일
+                      </Typography>
+                      <Typography sx={{ fontSize: '0.875rem' }}>
+                        {user.email}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>
+                        아이디
+                      </Typography>
+                      <Typography sx={{ fontSize: '0.875rem' }}>
+                        {user.userId}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>
+                        닉네임
+                      </Typography>
+                      <Typography sx={{ fontSize: '0.875rem' }}>
+                        {user.nickname}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
-
-                {/* 프로필 정보 항목 */}
-                <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {isEditing ? (
-                    <>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>
-                          닉네임
-                        </Typography>
-                        <TextField
-                          size="small"
-                          value={editedUser.nickname}
-                          onChange={(e) => setEditedUser({ ...editedUser, nickname: e.target.value })}
-                          sx={{ flex: 1, maxWidth: 300 }}
-                        />
-                      </Box>
-                      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                        <Button
-                          variant="contained"
-                          startIcon={<Save size={18} />}
-                          onClick={handleEditToggle}
-                          sx={{
-                            bgcolor: '#10B981',
-                            '&:hover': { bgcolor: '#059669' },
-                          }}
-                        >
-                          저장
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          startIcon={<X size={18} />}
-                          onClick={handleCancel}
-                          sx={{
-                            borderColor: '#E5E7EB',
-                            color: '#6B7280',
-                          }}
-                        >
-                          취소
-                        </Button>
-                      </Box>
-                    </>
-                  ) : (
-                    <>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>
-                          이메일
-                        </Typography>
-                        <Typography sx={{ fontSize: '0.875rem' }}>
-                          {user.email}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>
-                          아이디
-                        </Typography>
-                        <Typography sx={{ fontSize: '0.875rem' }}>
-                          {user.userId}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>
-                          닉네임
-                        </Typography>
-                        <Typography sx={{ fontSize: '0.875rem' }}>
-                          {user.nickname}
-                        </Typography>
-                      </Box>
-                    </>
-                  )}
-                </Box>
               </Box>
-            </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         {/* 밈 섹션 - 탭으로 구분 */}
         <Box>
@@ -398,10 +362,10 @@ const MyPage = () => {
                   minHeight: 48,
                 },
                 '& .Mui-selected': {
-                  color: '#10B981 !important',
+                  color: '#9333EA !important',
                 },
                 '& .MuiTabs-indicator': {
-                  backgroundColor: '#10B981',
+                  backgroundColor: '#9333EA',
                   height: 3,
                 },
               }}
@@ -418,8 +382,8 @@ const MyPage = () => {
                       sx={{
                         height: 20,
                         fontSize: '0.75rem',
-                        bgcolor: currentTab === 0 ? 'rgba(16, 185, 129, 0.1)' : '#F3F4F6',
-                        color: currentTab === 0 ? '#059669' : '#6B7280',
+                        bgcolor: currentTab === 0 ? 'rgba(147, 51, 234, 0.1)' : '#F3F4F6',
+                        color: currentTab === 0 ? '#9333EA' : '#6B7280',
                       }}
                     />
                   </Box>
@@ -437,8 +401,8 @@ const MyPage = () => {
                       sx={{
                         height: 20,
                         fontSize: '0.75rem',
-                        bgcolor: currentTab === 1 ? 'rgba(16, 185, 129, 0.1)' : '#F3F4F6',
-                        color: currentTab === 1 ? '#059669' : '#6B7280',
+                        bgcolor: currentTab === 1 ? 'rgba(147, 51, 234, 0.1)' : '#F3F4F6',
+                        color: currentTab === 1 ? '#9333EA' : '#6B7280',
                       }}
                     />
                   </Box>
@@ -487,8 +451,8 @@ const MyPage = () => {
                 variant="contained"
                 onClick={() => navigate('/upload')}
                 sx={{
-                  bgcolor: '#10B981',
-                  '&:hover': { bgcolor: '#059669' },
+                  bgcolor: '#9333EA',
+                  '&:hover': { bgcolor: '#7C3AED' },
                 }}
               >
                 밈 업로드하기
@@ -505,6 +469,13 @@ const MyPage = () => {
           )}
         </Box>
       </Container>
+
+      {/* 비밀번호 확인 모달 (일반 로그인 전용) */}
+      <PasswordConfirm
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        onConfirm={handlePasswordConfirm}
+      />
 
       {/* 계정 삭제 확인 다이얼로그 */}
       <Dialog
