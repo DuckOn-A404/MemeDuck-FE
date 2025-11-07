@@ -1,6 +1,6 @@
 import axios, { AxiosError, type AxiosRequestConfig } from "axios";
 
-const RAW = import.meta.env.VITE_API_BASE_URL; // undefined | '' | '/api'
+const RAW = import.meta.env.VITE_API_BASE_URL_MD; // undefined | '' | '/api'
 export const API_BASE = RAW || "/api";
 
 export const api = axios.create({
