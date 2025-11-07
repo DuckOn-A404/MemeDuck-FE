@@ -164,7 +164,9 @@ const SearchBar = () => {
               {/* 로고 (검색창 내부) */}
               <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', marginRight: '12px' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ fontSize: '1.5rem', lineHeight: 1 }}>🦆</Box>
+                  <Box sx={{ width: '24px', height: '24px', display: 'flex', alignItems: 'center' }}>
+                    <img src="/duck.svg" alt="MEMEDUCK" style={{ width: '100%', height: '100%' }} />
+                  </Box>
                   <Box
                     className="logo-text"
                     sx={{

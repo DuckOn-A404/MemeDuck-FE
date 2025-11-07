@@ -112,7 +112,9 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
           {/* 로고 */}
           <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ fontSize: '1.75rem', lineHeight: 1 }}>🦆</Box>
+              <Box sx={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center' }}>
+                <img src="/duck.svg" alt="MEMEDUCK" style={{ width: '100%', height: '100%' }} />
+              </Box>
               <Box
                 sx={{
                   fontSize: '1.25rem',
