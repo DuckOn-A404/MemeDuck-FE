@@ -94,11 +94,30 @@ const MyPage = () => {
 
   // HomePage에서 사용하는 GIF URL 샘플과 동일하게 사용
   const gifUrls = [
-    'https://media1.tenor.com/m/e9iDMJ5RGPUAAAAC/haewon-oh-haewon.gif',
-    'https://media1.tenor.com/m/Z1VaWV4_riUAAAAC/haewon-good-job-nmixx-good-job.gif',
-    'https://media1.tenor.com/m/WZ87EJ4k70gAAAAC/nmixx-jyp.gif',
-    'https://media1.tenor.com/m/z0Gb8C3USxsAAAAd/haewon-honest-reaction-haewon-fake-smile.gif',
-    'https://media1.tenor.com/m/h5SzIYUesvUAAAAC/bae-bae-surprised.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/kpop_6.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/aespa_giselle_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/aespa_karina_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/aespa_ningning_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/aespa_ningning_2.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/aespa_winter_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_2.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_3.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_4.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_5.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie.jpg',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jisoo.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/bts_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/bts_suga_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/ive_leeseo_1.jpg',
+    'https://d23breqm38jov9.cloudfront.net/memes/kpop_1.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/kpop_2.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/kpop_3.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/kpop_4.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/kpop_5.gif',
+    'https://d23breqm38jov9.cloudfront.net/memes/lesserafim_hyj_1.jpg',
+    'https://d23breqm38jov9.cloudfront.net/memes/produce.gif',
   ];
   const getRandomGifUrl = () => gifUrls[Math.floor(Math.random() * gifUrls.length)];
 
