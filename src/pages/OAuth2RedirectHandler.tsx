@@ -46,7 +46,8 @@ const OAuth2RedirectHandler = () => {
           }
         }
 
-        setMyUser(userData);
+        const normalized = { ...userData, artistList: (userData as any).artistList ?? [] } as any;
+        setMyUser(normalized);
 
         navigate("/");
       } catch {

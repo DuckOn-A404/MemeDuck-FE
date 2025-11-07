@@ -20,7 +20,8 @@ const HomePage = () => {
         try {
           const { fetchMyProfile } = await import('../api/userService');
           const userData = await fetchMyProfile();
-          setMyUser(userData);
+          const normalized = { ...userData, artistList: userData.artistList ?? [] } as any;
+          setMyUser(normalized);
         } catch (error) {
           console.error('사용자 정보 로드 실패:', error);
         }
