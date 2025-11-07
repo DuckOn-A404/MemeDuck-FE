@@ -29,11 +29,11 @@ const MemeDetailPage = () => {
 
   // 홈 화면과 동일한 더미 GIF URL 목록 (Tenor)
   const randomGifs = [
-    'https://media1.tenor.com/m/elCp2_fukbwAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/hOjxKIQML6YAAAAC/%EC%A2%8B%EB%B9%A0%EA%B0%80-%EC%9C%A4%EC%84%9D%EC%97%B4.gif',
-    'https://media1.tenor.com/m/tOKJBiXdgmUAAAAC/%ED%95%9C%EA%B5%AD%EC%98%81%ED%99%94.gif',
-    'https://media1.tenor.com/m/hFbzrQZ1oNEAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/9NVSJSAuVhUAAAAd/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
+    'https://media1.tenor.com/m/e9iDMJ5RGPUAAAAC/haewon-oh-haewon.gif',
+    'https://media1.tenor.com/m/Z1VaWV4_riUAAAAC/haewon-good-job-nmixx-good-job.gif',
+    'https://media1.tenor.com/m/WZ87EJ4k70gAAAAC/nmixx-jyp.gif',
+    'https://media1.tenor.com/m/z0Gb8C3USxsAAAAd/haewon-honest-reaction-haewon-fake-smile.gif',
+    'https://media1.tenor.com/m/h5SzIYUesvUAAAAC/bae-bae-surprised.gif',
   ];
 
   // 임시 데이터 (실제로는 API에서 가져옴)
@@ -44,7 +44,7 @@ const MemeDetailPage = () => {
     return {
       id: id || '1',
       gifUrl: selectedGif,
-      tags: ['랜덤', '테스트', 'GIF', '밈', '재미'],
+      tags: ['NMIXX', '해원', '배이', '귀여운', '웃긴'],
       uploadDate: '2024.03.15',
       downloadCount: Math.floor(Math.random() * 5000) + 100,
       likeCount: Math.floor(Math.random() * 3000) + 50,

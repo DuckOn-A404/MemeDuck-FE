@@ -94,11 +94,11 @@ const MyPage = () => {
 
   // HomePage에서 사용하는 GIF URL 샘플과 동일하게 사용
   const gifUrls = [
-    'https://media1.tenor.com/m/elCp2_fukbwAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/hOjxKIQML6YAAAAC/%EC%A2%8B%EB%B9%A0%EA%B0%80-%EC%9C%A4%EC%84%9D%EC%97%B4.gif',
-    'https://media1.tenor.com/m/tOKJBiXdgmUAAAAC/%ED%95%9C%EA%B5%AD%EC%98%81%ED%99%94.gif',
-    'https://media1.tenor.com/m/hFbzrQZ1oNEAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/9NVSJSAuVhUAAAAd/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
+    'https://media1.tenor.com/m/e9iDMJ5RGPUAAAAC/haewon-oh-haewon.gif',
+    'https://media1.tenor.com/m/Z1VaWV4_riUAAAAC/haewon-good-job-nmixx-good-job.gif',
+    'https://media1.tenor.com/m/WZ87EJ4k70gAAAAC/nmixx-jyp.gif',
+    'https://media1.tenor.com/m/z0Gb8C3USxsAAAAd/haewon-honest-reaction-haewon-fake-smile.gif',
+    'https://media1.tenor.com/m/h5SzIYUesvUAAAAC/bae-bae-surprised.gif',
   ];
   const getRandomGifUrl = () => gifUrls[Math.floor(Math.random() * gifUrls.length)];
 
@@ -107,7 +107,7 @@ const MyPage = () => {
     {
       id: '1',
       gifUrl: getRandomGifUrl(),
-      tags: ['BTS', '웃긴', '댄스'],
+      tags: ['NMIXX', '해원', '귀여운'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: Math.random() > 0.5,
@@ -116,7 +116,7 @@ const MyPage = () => {
     {
       id: '2',
       gifUrl: getRandomGifUrl(),
-      tags: ['블랙핑크', '귀여운'],
+      tags: ['NMIXX', '릴리', '멋진'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: Math.random() > 0.5,
@@ -125,7 +125,7 @@ const MyPage = () => {
     {
       id: '3',
       gifUrl: getRandomGifUrl(),
-      tags: ['뉴진스', '트렌디'],
+      tags: ['NMIXX', '설윤', '트렌디'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: Math.random() > 0.5,
@@ -134,7 +134,7 @@ const MyPage = () => {
     {
       id: '4',
       gifUrl: getRandomGifUrl(),
-      tags: ['SEVENTEEN', '웃긴'],
+      tags: ['NMIXX', '배이', '웃긴'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: Math.random() > 0.5,
@@ -147,7 +147,7 @@ const MyPage = () => {
     {
       id: '5',
       gifUrl: getRandomGifUrl(),
-      tags: ['아이브', '멋진'],
+      tags: ['NMIXX', '지우', '멋진'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: true,
@@ -156,7 +156,7 @@ const MyPage = () => {
     {
       id: '6',
       gifUrl: getRandomGifUrl(),
-      tags: ['에스파', '신기한'],
+      tags: ['NMIXX', '규진', '신기한'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: true,

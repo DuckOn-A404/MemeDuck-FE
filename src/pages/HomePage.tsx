@@ -32,14 +32,14 @@ const HomePage = () => {
 
   // 실제 GIF URL 사용
   const gifUrls = [
-    'https://media1.tenor.com/m/elCp2_fukbwAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/hOjxKIQML6YAAAAC/%EC%A2%8B%EB%B9%A0%EA%B0%80-%EC%9C%A4%EC%84%9D%EC%97%B4.gif',
-    'https://media1.tenor.com/m/tOKJBiXdgmUAAAAC/%ED%95%9C%EA%B5%AD%EC%98%81%ED%99%94.gif',
-    'https://media1.tenor.com/m/hFbzrQZ1oNEAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/9NVSJSAuVhUAAAAd/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
+    'https://media1.tenor.com/m/e9iDMJ5RGPUAAAAC/haewon-oh-haewon.gif',
+    'https://media1.tenor.com/m/Z1VaWV4_riUAAAAC/haewon-good-job-nmixx-good-job.gif',
+    'https://media1.tenor.com/m/WZ87EJ4k70gAAAAC/nmixx-jyp.gif',
+    'https://media1.tenor.com/m/z0Gb8C3USxsAAAAd/haewon-honest-reaction-haewon-fake-smile.gif',
+    'https://media1.tenor.com/m/h5SzIYUesvUAAAAC/bae-bae-surprised.gif',
   ];
 
-  const popularTags = ['BTS', '블랙핑크', '뉴진스', 'SEVENTEEN', 'IVE', '에스파', 'NCT', 'TWICE'];
+  const popularTags = ['NMIXX', '해원', '릴리', '설윤', '배이', '지우', '규진', 'JYP'];
   
   // GIF URL을 섞어서 사용
   const getRandomGifUrl = () => gifUrls[Math.floor(Math.random() * gifUrls.length)];
@@ -49,7 +49,7 @@ const HomePage = () => {
     Array.from({ length: 8 }, (_, i) => ({
       id: `trending-${i}`,
       gifUrl: getRandomGifUrl(),
-      tags: ['이재명', '정치', '웃긴'],
+      tags: ['NMIXX', '해원', '귀여운'],
       viewCount: Math.floor(Math.random() * 100000) + 50000,
       likeCount: Math.floor(Math.random() * 10000) + 1000,
       isLiked: Math.random() > 0.5,
@@ -61,7 +61,7 @@ const HomePage = () => {
     Array.from({ length: 20 }, (_, i) => ({
       id: `all-${i}`,
       gifUrl: getRandomGifUrl(),
-      tags: ['윤석열', '한국영화', '밈'],
+      tags: ['NMIXX', '배이', '웃긴'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: Math.random() > 0.5,
@@ -83,7 +83,7 @@ const HomePage = () => {
       const newMemes = Array.from({ length: 12 }, (_, i) => ({
         id: `all-${currentLength + i}`,
         gifUrl: getRandomGifUrl(),
-        tags: ['윤석열', '한국영화', '밈'],
+        tags: ['NMIXX', '배이', '웃긴'],
         viewCount: Math.floor(Math.random() * 50000) + 10000,
         likeCount: Math.floor(Math.random() * 5000) + 500,
         isLiked: Math.random() > 0.5,

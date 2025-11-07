@@ -11,11 +11,11 @@ const SearchResultPage = () => {
   
   // HomePage와 동일한 GIF URL 사용
   const gifUrls = [
-    'https://media1.tenor.com/m/elCp2_fukbwAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/hOjxKIQML6YAAAAC/%EC%A2%8B%EB%B9%A0%EA%B0%80-%EC%9C%A4%EC%84%9D%EC%97%B4.gif',
-    'https://media1.tenor.com/m/tOKJBiXdgmUAAAAC/%ED%95%9C%EA%B5%AD%EC%98%81%ED%99%94.gif',
-    'https://media1.tenor.com/m/hFbzrQZ1oNEAAAAC/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
-    'https://media1.tenor.com/m/9NVSJSAuVhUAAAAd/%EC%9D%B4%EC%9E%AC%EB%AA%85-%EB%8D%94%EB%B6%88%EC%96%B4%EB%AF%BC%EC%A3%BC%EB%8B%B9.gif',
+    'https://media1.tenor.com/m/e9iDMJ5RGPUAAAAC/haewon-oh-haewon.gif',
+    'https://media1.tenor.com/m/Z1VaWV4_riUAAAAC/haewon-good-job-nmixx-good-job.gif',
+    'https://media1.tenor.com/m/WZ87EJ4k70gAAAAC/nmixx-jyp.gif',
+    'https://media1.tenor.com/m/z0Gb8C3USxsAAAAd/haewon-honest-reaction-haewon-fake-smile.gif',
+    'https://media1.tenor.com/m/h5SzIYUesvUAAAAC/bae-bae-surprised.gif',
   ];
   
   const getRandomGifUrl = () => gifUrls[Math.floor(Math.random() * gifUrls.length)];
@@ -25,7 +25,7 @@ const SearchResultPage = () => {
     Array.from({ length: 12 }, (_, i) => ({
       id: `search-${i}`,
       gifUrl: getRandomGifUrl(),
-      tags: ['이재명', '정치', '웃긴', query || '검색어'],
+      tags: ['NMIXX', '해원', '배이', query || '검색어'],
       viewCount: Math.floor(Math.random() * 50000) + 10000,
       likeCount: Math.floor(Math.random() * 5000) + 500,
       isLiked: Math.random() > 0.5,
@@ -39,7 +39,7 @@ const SearchResultPage = () => {
       const newResults = Array.from({ length: 12 }, (_, i) => ({
         id: `search-${query}-${i}`,
         gifUrl: getRandomGifUrl(),
-        tags: ['이재명', '정치', '웃긴', query],
+        tags: ['NMIXX', '해원', '배이', query],
         viewCount: Math.floor(Math.random() * 50000) + 10000,
         likeCount: Math.floor(Math.random() * 5000) + 500,
         isLiked: Math.random() > 0.5,
