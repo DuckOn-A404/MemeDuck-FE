@@ -100,6 +100,6 @@ export interface TopMemesResponse {
 }
 
 export const getTopMemes = async (): Promise<TopMemesResponse> => {
-  const response = await api.get<TopMemesResponse>('/memes/top/hourly');
+  const response = await api.get<TopMemesResponse>('/memes/top/total');
   return response.data;
 }
