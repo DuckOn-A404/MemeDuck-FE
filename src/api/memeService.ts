@@ -86,3 +86,20 @@ export const getRandomMemes = async (
 
   return response.data;
 };
+
+// 밈 top 10 조회 api
+export interface TopMemesResponse {
+  status: number;
+  message: string;
+  data: {
+    page: number;
+    size: number;
+    total: number;
+    items: MemeItem[];
+  };
+}
+
+export const getTopMemes = async (): Promise<TopMemesResponse> => {
+  const response = await api.get<TopMemesResponse>('/memes/top/hourly');
+  return response.data;
+}

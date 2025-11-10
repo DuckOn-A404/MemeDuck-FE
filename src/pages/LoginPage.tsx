@@ -49,7 +49,7 @@ const LoginPage = () => {
       <LoginSignupCard>
         {/* 로고 & 문구 */}
         <div className="flex flex-col items-center gap-x-2 mb-10">
-          <img className="h-8" src="/logo.svg" alt="밈덕 로고" />
+          <img className="h-8" src="/duck.svg" alt="밈덕 로고" />
           <p className="text-sm text-gray-600 text-center">
             밈을 공유하고 즐기는 공간
           </p>
