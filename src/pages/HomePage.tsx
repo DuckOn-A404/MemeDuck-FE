@@ -8,6 +8,8 @@ import PopularTags from '../components/tag/PopularTags';
 import { Flame, Sparkles } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { getAccessToken } from '../api/axiosInstance';
+import { getRandomMemes } from '../api/memeService';
+import type { MemeItem } from '../api/memeService';
 
 const HomePage = () => {
   const { myUser, setMyUser } = useUserStore();
@@ -76,47 +78,55 @@ const HomePage = () => {
   );
   
   // 무한 스크롤 상태
-  const [allMemes, setAllMemes] = useState(() => 
-    Array.from({ length: 20 }, (_, i) => ({
-      id: `all-${i}`,
-      gifUrl: getRandomGifUrl(),
-      tags: ['NMIXX', '배이', '웃긴'],
-      viewCount: Math.floor(Math.random() * 50000) + 10000,
-      likeCount: Math.floor(Math.random() * 5000) + 500,
-      isLiked: Math.random() > 0.5,
-    }))
-  );
+  const [allMemes, setAllMemes] = useState<MemeItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // 초기 밈 로드
+  useEffect(() => {
+    const loadInitialMemes = async () => {
+      try {
+        setIsInitialLoading(true);
+        const response = await getRandomMemes(1, 20);
+        setAllMemes(response.data.items);
+        setCurrentPage(1);
+        setHasMore(response.data.items.length < response.data.total);
+      } catch (error) {
+        console.error('초기 밈 로드 실패:', error);
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    loadInitialMemes();
+  }, []);
 
   // 더 많은 밈 로드
-  const loadMoreMemes = useCallback(() => {
+  const loadMoreMemes = useCallback(async () => {
     if (isLoading || !hasMore) return;
     
-    setIsLoading(true);
-    
-    // 실제로는 API 호출, 여기서는 시뮬레이션
-    setTimeout(() => {
-      const currentLength = allMemes.length;
-      const newMemes = Array.from({ length: 12 }, (_, i) => ({
-        id: `all-${currentLength + i}`,
-        gifUrl: getRandomGifUrl(),
-        tags: ['NMIXX', '배이', '웃긴'],
-        viewCount: Math.floor(Math.random() * 50000) + 10000,
-        likeCount: Math.floor(Math.random() * 5000) + 500,
-        isLiked: Math.random() > 0.5,
-      }));
+    try {
+      setIsLoading(true);
+      const nextPage = currentPage + 1;
+      const response = await getRandomMemes(nextPage, 12);
       
-      setAllMemes(prev => [...prev, ...newMemes]);
-      setIsLoading(false);
+      setAllMemes(prev => [...prev, ...response.data.items]);
+      setCurrentPage(nextPage);
       
-      // 100개 이상이면 더 이상 로드하지 않음 (데모용)
-      if (currentLength + newMemes.length >= 100) {
+      // 더 이상 로드할 밈이 없으면 hasMore를 false로 설정
+      const totalLoaded = allMemes.length + response.data.items.length;
+      if (totalLoaded >= response.data.total || response.data.items.length === 0) {
         setHasMore(false);
       }
-    }, 1000);
-  }, [allMemes.length, isLoading, hasMore]);
+    } catch (error) {
+      console.error('밈 로드 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, isLoading, hasMore, allMemes.length]);
 
   // Intersection Observer로 스크롤 감지
   // rootMargin을 사용해 화면 하단 800px 전에 미리 로드
@@ -214,11 +224,25 @@ const HomePage = () => {
               </Typography>
             </Box>
             
-            <MasonryGrid>
-              {allMemes.map((meme) => (
-                <MemeCard key={meme.id} {...meme} />
-              ))}
-            </MasonryGrid>
+            {isInitialLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                <CircularProgress size={40} sx={{ color: '#9333EA' }} />
+              </Box>
+            ) : (
+              <MasonryGrid>
+                {allMemes.map((meme, index) => (
+                  <MemeCard 
+                    key={`${meme.memeId}-${index}`} 
+                    id={meme.memeId.toString()}
+                    gifUrl={meme.memeUrl}
+                    tags={meme.tags}
+                    viewCount={0}
+                    likeCount={0}
+                    isLiked={false}
+                  />
+                ))}
+              </MasonryGrid>
+            )}
           </Box>
 
           {/* 무한 스크롤 로딩 표시 */}

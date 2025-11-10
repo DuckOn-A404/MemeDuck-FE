@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import Header from '../components/layout/Header';
 import { useUserStore } from '../store/useUserStore';
+import { createMemes } from '../api/memeService';
 
 interface UploadedFile {
   id: string;
@@ -169,11 +170,24 @@ const UploadPage = () => {
 
     setIsSubmitting(true);
     
-    // 실제로는 API 호출
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // 파일과 태그 배열 준비
+      const files = uploadedFiles.map(f => f.file);
+      const tags = uploadedFiles.map(f => f.tags);
+
+      // API 호출
+      const response = await createMemes(files, tags);
+      
+      console.log('밈 업로드 성공:', response);
+      
+      // 성공 시 홈으로 이동
       navigate('/');
-    }, 2000);
+    } catch (error) {
+      console.error('밈 업로드 실패:', error);
+      alert('밈 업로드에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // 로그인 알림 닫기
