@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardMedia, Chip, IconButton, Box, Fade } from '@mui/material';
-import { Download } from 'lucide-react';
+import { Download, Star } from 'lucide-react';
 
 interface MemeCardProps {
   id: string;
@@ -10,9 +10,13 @@ interface MemeCardProps {
   viewCount: number;
   likeCount: number;
   isLiked?: boolean;
+
+  // 즐겨찾기용 prop 추가하기
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
 }
 
-const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
+const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite }: MemeCardProps) => {
   const navigate = useNavigate();
   const [hover, setHover] = useState(false);
 
@@ -85,6 +89,34 @@ const MemeCard = ({ id, gifUrl, tags }: MemeCardProps) => {
             }}
           />
         </Fade>
+
+        {/* 즐겨찾기 버튼 */}
+        {onToggleFavorite && (
+          <Fade in={hover}>
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(id);
+              }}
+              sx={{
+                position: "absolute",
+                top: 12,
+                right: 60,
+                bgcolor: "rgba(0,0,0,0.35)",
+                "&:hover": {
+                  bgcolor: "rgba(0,0,0,0.6)",
+                },
+              }}
+            >
+              <Star
+                size={18}
+                strokeWidth={2.5}
+                color={isFavorite ? "#facc15" : "white"}
+                fill={isFavorite ? "#facc15" : "transparent"}
+              />
+            </IconButton>
+          </Fade>
+        )}
 
         {/* 다운로드 버튼 */}
         <Fade in={hover}>

@@ -10,9 +10,13 @@ import { useUserStore } from '../store/useUserStore';
 import { getAccessToken } from '../api/axiosInstance';
 import { getRandomMemes } from '../api/memeService';
 import type { MemeItem } from '../api/memeService';
+import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
 
 const HomePage = () => {
   const { myUser, setMyUser } = useUserStore();
+
+  // 즐겨찾기 훅
+  const { favoriteIds, toggleFavorite, isLoaded } = useFavoriteMemes();
 
   // 페이지 로드 시 토큰이 있으면 사용자 정보 로드
   useEffect(() => {
@@ -62,10 +66,9 @@ const HomePage = () => {
 
   const popularTags = ['NMIXX', '해원', '릴리', '설윤', '배이', '지우', '규진', 'JYP'];
   
-  // GIF URL을 섞어서 사용
   const getRandomGifUrl = () => gifUrls[Math.floor(Math.random() * gifUrls.length)];
   
-  // 인기 밈 TOP 8 (초기 렌더링 시 한 번만 생성)
+  // 인기 밈 TOP 8 (더미)
   const [trendingMemes] = useState(() => 
     Array.from({ length: 8 }, (_, i) => ({
       id: `trending-${i}`,
@@ -77,10 +80,9 @@ const HomePage = () => {
     }))
   );
   
-  // 무한 스크롤 상태
+  // 실제 API에서 받아온 밈들
   const [allMemes, setAllMemes] = useState<MemeItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -116,7 +118,6 @@ const HomePage = () => {
       setAllMemes(prev => [...prev, ...response.data.items]);
       setCurrentPage(nextPage);
       
-      // 더 이상 로드할 밈이 없으면 hasMore를 false로 설정
       const totalLoaded = allMemes.length + response.data.items.length;
       if (totalLoaded >= response.data.total || response.data.items.length === 0) {
         setHasMore(false);
@@ -128,11 +129,10 @@ const HomePage = () => {
     }
   }, [currentPage, isLoading, hasMore, allMemes.length]);
 
-  // Intersection Observer로 스크롤 감지
-  // rootMargin을 사용해 화면 하단 800px 전에 미리 로드
+  // 스크롤 감지
   const { ref: loadMoreRef } = useInView({
     threshold: 0,
-    rootMargin: '800px',  // 화면 하단 800px 전에 트리거
+    rootMargin: '800px',
     onChange: (inView) => {
       if (inView && hasMore && !isLoading) {
         loadMoreMemes();
@@ -142,7 +142,6 @@ const HomePage = () => {
 
   const handleTagClick = (tag: string) => {
     console.log('Tag clicked:', tag);
-    // TODO: 태그 필터링 로직
   };
 
   return (
@@ -191,7 +190,12 @@ const HomePage = () => {
             
             <MasonryGrid>
               {trendingMemes.map((meme) => (
-                <MemeCard key={meme.id} {...meme} />
+                <MemeCard
+                  key={meme.id}
+                  {...meme}
+                  isFavorite={isLoaded && favoriteIds.has(meme.id)}
+                  onToggleFavorite={(id) => toggleFavorite(id)}
+                />
               ))}
             </MasonryGrid>
           </Box>
@@ -230,17 +234,21 @@ const HomePage = () => {
               </Box>
             ) : (
               <MasonryGrid>
-                {allMemes.map((meme, index) => (
-                  <MemeCard 
-                    key={`${meme.memeId}-${index}`} 
-                    id={meme.memeId.toString()}
-                    gifUrl={meme.memeUrl}
-                    tags={meme.tags}
-                    viewCount={0}
-                    likeCount={0}
-                    isLiked={false}
-                  />
-                ))}
+                {allMemes.map((meme, index) => {
+                  const idStr = meme.memeId.toString();
+                  return (
+                    <MemeCard 
+                      key={`${meme.memeId}-${index}`} 
+                      id={idStr}
+                      gifUrl={meme.memeUrl}
+                      tags={meme.tags}
+                      viewCount={0}
+                      likeCount={0}
+                      isFavorite={isLoaded && favoriteIds.has(idStr)}
+                      onToggleFavorite={(id) => toggleFavorite(id)}
+                    />
+                  );
+                })}
               </MasonryGrid>
             )}
           </Box>
