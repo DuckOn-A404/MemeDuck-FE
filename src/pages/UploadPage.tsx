@@ -56,7 +56,13 @@ const UploadPage = () => {
   }, []);
 
   // 드래그 앤 드롭 설정
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback((acceptedFiles: File[], fileRejections: any[]) => {
+    if (fileRejections && fileRejections.length > 0) {
+      const hasTooLargeVideo = fileRejections.some(r => r.file?.type?.startsWith('video/') && r.errors?.some((e: any) => e.code === 'file-too-large'));
+      if (hasTooLargeVideo) {
+        alert('동영상은 최대 20MB까지 업로드할 수 있습니다.');
+      }
+    }
     // 최대 1개까지만 업로드 가능
     const remainingSlots = 1 - uploadedFiles.length;
     const filesToAdd = acceptedFiles.slice(0, remainingSlots);
@@ -91,6 +97,12 @@ const UploadPage = () => {
     maxFiles: 1,
     multiple: false,
     disabled: uploadedFiles.length >= 1,
+    validator: (file: File) => {
+      if (file.type && file.type.startsWith('video/') && file.size > 20 * 1024 * 1024) {
+        return { code: 'file-too-large', message: 'Video larger than 20MB' } as any;
+      }
+      return null;
+    },
   });
 
   // 업로드 시뮬레이션
@@ -343,7 +355,7 @@ const UploadPage = () => {
                   GIF, MP4, WebM 파일을 업로드할 수 있습니다
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  최대 1개 파일 · 파일당 최대 100MB
+                  최대 1개 파일 · 동영상 최대 20MB
                 </Typography>
               </Paper>
             ) : (
