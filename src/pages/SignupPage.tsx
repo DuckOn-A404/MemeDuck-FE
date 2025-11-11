@@ -58,7 +58,7 @@ const SignupPage = () => {
       <LoginSignupCard>
         {/* 로고 영역 */}
         <div className="flex flex-col items-center gap-1 mb-4">
-          <img src="/logo.svg" alt="밈덕 로고" className="h-8 w-auto" />
+          <img src="/duck.svg" alt="밈덕 로고" className="h-8 w-auto" />
           <p className="text-center text-gray-500 text-base font-normal leading-normal">
             밈을 공유하고 즐기는 공간
           </p>

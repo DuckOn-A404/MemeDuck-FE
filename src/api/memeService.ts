@@ -103,3 +103,8 @@ export const getTopMemes = async (): Promise<TopMemesResponse> => {
   const response = await api.get<TopMemesResponse>('/memes/top/total');
   return response.data;
 }
+
+export async function fetchMemeDetail(memeId: number | string) {
+  const res = await api.get(`/memes/${memeId}/detail`);
+  return res.data.data;  
+}
