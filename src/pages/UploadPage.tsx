@@ -50,10 +50,15 @@ const UploadPage = () => {
   const [currentGuideStep, setCurrentGuideStep] = useState(0);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
 
+  const formatFileName = useCallback((name: string, max = 20) => {
+    if (name.length > max) return name.slice(0, max) + '....';
+    return name;
+  }, []);
+
   // 드래그 앤 드롭 설정
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    // 최대 3개까지만 업로드 가능
-    const remainingSlots = 3 - uploadedFiles.length;
+    // 최대 1개까지만 업로드 가능
+    const remainingSlots = 1 - uploadedFiles.length;
     const filesToAdd = acceptedFiles.slice(0, remainingSlots);
     
     if (filesToAdd.length === 0) return;
@@ -83,9 +88,9 @@ const UploadPage = () => {
       'video/mp4': ['.mp4'],
       'video/webm': ['.webm'],
     },
-    maxFiles: 3,
-    multiple: true,
-    disabled: uploadedFiles.length >= 3,
+    maxFiles: 1,
+    multiple: false,
+    disabled: uploadedFiles.length >= 1,
   });
 
   // 업로드 시뮬레이션
@@ -129,10 +134,22 @@ const UploadPage = () => {
     setUploadedFiles(prev =>
       prev.map(f => {
         if (f.id === fileId) {
-          const trimmedTag = f.tagInput.trim();
-          if (trimmedTag && !f.tags.includes(trimmedTag) && f.tags.length < 10) {
-            return { ...f, tags: [...f.tags, trimmedTag], tagInput: '' };
-          }
+          const input = f.tagInput.trim();
+          if (!input) return f;
+
+          // #으로 구분된 태그들을 추출
+          const hashtagRegex = /#[\w가-힣]+/g;
+          const hashTags = input.match(hashtagRegex) || [];
+          
+          // #을 제거하고 중복 제거
+          const newTags = hashTags
+            .map(tag => tag.substring(1)) // # 제거
+            .filter(tag => tag && !f.tags.includes(tag)); // 중복 제거
+
+          // 기존 태그와 합치되, 최대 10개까지만
+          const combinedTags = [...f.tags, ...newTags].slice(0, 10);
+          
+          return { ...f, tags: combinedTags, tagInput: '' };
         }
         return f;
       })
@@ -326,7 +343,7 @@ const UploadPage = () => {
                   GIF, MP4, WebM 파일을 업로드할 수 있습니다
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  최대 3개 파일 · 파일당 최대 100MB
+                  최대 1개 파일 · 파일당 최대 100MB
                 </Typography>
               </Paper>
             ) : (
@@ -361,17 +378,30 @@ const UploadPage = () => {
                           }}
                         >
                           {/* 미리보기 이미지 */}
-                          <Box sx={{ position: 'relative', aspectRatio: '16/9', bgcolor: '#F3F4F6' }}>
-                            <Box
-                              component="img"
-                              src={file.preview}
-                              alt="Preview"
-                              sx={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain',
-                              }}
-                            />
+                          <Box sx={{ position: 'relative', width: '100%', height: '400px', bgcolor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {file.file.type.startsWith('video/') ? (
+                              <Box
+                                component="video"
+                                src={file.preview}
+                                controls
+                                sx={{
+                                  maxWidth: '100%',
+                                  maxHeight: '100%',
+                                  objectFit: 'contain',
+                                }}
+                              />
+                            ) : (
+                              <Box
+                                component="img"
+                                src={file.preview}
+                                alt="Preview"
+                                sx={{
+                                  maxWidth: '100%',
+                                  maxHeight: '100%',
+                                  objectFit: 'contain',
+                                }}
+                              />
+                            )}
                             <IconButton
                               onClick={() => removeFile(file.id)}
                               sx={{
@@ -395,8 +425,8 @@ const UploadPage = () => {
                           <Box sx={{ p: 1.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                               <FileVideo size={16} color="#6B7280" />
-                              <Typography variant="body2" fontWeight={600} noWrap sx={{ flex: 1 }}>
-                                {file.file.name}
+                              <Typography variant="body2" fontWeight={600} noWrap sx={{ flex: 1 }} title={file.file.name}>
+                                {formatFileName(file.file.name)}
                               </Typography>
                             </Box>
                             <Typography variant="caption" color="text.secondary">
@@ -520,36 +550,6 @@ const UploadPage = () => {
                   </Paper>
                 ))}
 
-                {/* 추가 업로드 버튼 */}
-                {uploadedFiles.length < 3 && (
-                  <Paper
-                    {...getRootProps()}
-                    sx={{
-                      border: '2px dashed #D1D5DB',
-                      borderRadius: 3,
-                      p: 4,
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      bgcolor: isDragActive ? 'rgba(147, 51, 234, 0.05)' : 'white',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                      '&:hover': {
-                        borderColor: '#9333EA',
-                        bgcolor: 'rgba(147, 51, 234, 0.02)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                      },
-                    }}
-                  >
-                    <input {...getInputProps()} />
-                    <Upload size={40} color="#9333EA" style={{ marginBottom: 12 }} />
-                    <Typography variant="h6" fontWeight={700} color="#9333EA" gutterBottom>
-                      + 추가 업로드
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {3 - uploadedFiles.length}개 더 추가 가능
-                    </Typography>
-                  </Paper>
-                )}
               </Box>
             )}
           </Box>
