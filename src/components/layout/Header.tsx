@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, Menu, MenuItem, ListItemIcon, ListItemText, Divider, InputBase, Avatar } from '@mui/material';
-import { Upload, UserCircle, LogOut, Search } from 'lucide-react';
+import { Upload, UserCircle, LogOut, Search, Trophy } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, LayoutGroup } from 'framer-motion';
 import { useUserStore } from '../../store/useUserStore';
@@ -206,14 +206,52 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
 
           {/* 우측 버튼들 */}
           <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-            {/* 업로드 버튼 - 항상 표시 */}
+            {/* 리더보드 버튼 */}
+            <Link to="/leaderboard" style={{ textDecoration: 'none' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 2,
+                  py: 1,
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: 2,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.3)',
+                    transform: 'translateY(-2px)',
+                    '& .leaderboard-text': {
+                      color: '#FFD700',
+                    },
+                  },
+                }}
+              >
+                <Trophy size={16} color="white" strokeWidth={2.5} />
+                <Box
+                  className="leaderboard-text"
+                  sx={{
+                    fontSize: '0.875rem',
+                    fontWeight: 700,
+                    color: 'white',
+                    display: { xs: 'none', sm: 'block' },
+                    transition: 'color 0.3s ease',
+                  }}
+                >
+                  랭킹
+                </Box>
+              </Box>
+            </Link>
+
+            {/* 업로드 버튼 */}
             <Link to="/upload" style={{ textDecoration: 'none' }}>
               <Box
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
-                  px: 2.5,
+                  px: 2,
                   py: 1,
                   bgcolor: 'white',
                   borderRadius: 3,

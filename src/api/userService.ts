@@ -1,5 +1,6 @@
 import { api } from "./axiosInstance";
 import type { MyUser, OtherUser } from "../types/mypage";
+import type { UserRank } from "../types";
 
 // 현재 사용자 정보 조회
 export const fetchMyProfile = async (): Promise<MyUser> => {
@@ -44,4 +45,30 @@ export const updateUserProfile = async (formData: FormData): Promise<MyUser> => 
 
   const res = await api.patch<MyUser>("/users/me", fd);
   return res.data;
+};
+
+// 리더보드 유저 타입
+export interface LeaderboardUser {
+  nickname: string;
+  userId: string;
+  profileImgUrl: string;
+  userRank: UserRank;
+}
+
+// 리더보드 응답 타입
+export interface LeaderboardResponse {
+  status: number;
+  message: string;
+  data: LeaderboardUser[];
+}
+
+// 유저 리더보드 조회 (TOP 10)
+export const getUserLeaderboard = async (
+  page: number = 0,
+  size: number = 10
+): Promise<LeaderboardResponse> => {
+  const response = await api.get<LeaderboardResponse>("/users/leaderboard", {
+    params: { page, size },
+  });
+  return response.data;
 };

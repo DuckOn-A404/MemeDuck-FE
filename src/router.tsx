@@ -7,6 +7,7 @@ import MemeDetailPage from './pages/MemeDetailPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler';
+import LeaderboardPage from './pages/LeaderboardPage';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
   {
     path: '/mypage',
     element: <MyPage />,
+  },
+  {
+    path: '/leaderboard',
+    element: <LeaderboardPage />,
   },
   {
     path: '/search/:query',
