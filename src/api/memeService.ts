@@ -133,3 +133,39 @@ export const logMemeUsage = async (
 
   return response.data;
 };
+
+/**
+ * 내가 만든 밈 목록 조회 API
+ * GET /api/memes/mine
+ * 
+ * @param page - 페이지 번호 (기본값: 1)
+ * @param size - 페이지 크기 (기본값: 10)
+ * @returns 내가 생성한 밈 목록
+ */
+export interface MyMemeItem {
+  memeId: number;
+  imageUrl: string;
+  createdAt: string;
+  usageCnt: number;
+  downloadCnt: number;
+}
+
+export interface MyMemesResponse {
+  status: number;
+  message: string;
+  data: MyMemeItem[];
+}
+
+export const getMyMemes = async (
+  page: number = 1,
+  size: number = 10
+): Promise<MyMemesResponse> => {
+  const response = await api.get<MyMemesResponse>('/memes/mine', {
+    params: {
+      page,
+      size,
+    },
+  });
+
+  return response.data;
+};

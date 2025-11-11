@@ -574,6 +574,7 @@ import { fetchMyFavoriteMemes } from '../api/memeFavorite';
 import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
 import NicknameWithRank from '../components/common/NicknameWithRank';
 import RankProgress from '../components/common/RankProgress';
+import { getMyMemes, type MyMemeItem } from '../api/memeService';
 
 // 마이페이지에서 카드에 넘길 형태
 type FavoriteMemeForPage = {
@@ -583,15 +584,16 @@ type FavoriteMemeForPage = {
   favoritedAt?: string;
 };
 
-// 임시 업로드 밈 타입 (기존 코드 유지)
+// 업로드한 밈 타입 (API 응답 기반)
 interface UploadedMeme {
   id: string;
   gifUrl: string;
   tags: string[];
   viewCount: number;
   likeCount: number;
-  isLiked?: boolean;
   uploadedAt: string;
+  usageCnt: number;
+  downloadCnt: number;
 }
 
 interface User {
@@ -646,6 +648,9 @@ const MyPage = () => {
 
   // 실제 즐겨찾기 목록
   const [favoriteMemes, setFavoriteMemes] = useState<FavoriteMemeForPage[]>([]);
+  
+  // 업로드한 밈 목록 (API 연동)
+  const [uploadedMemes, setUploadedMemes] = useState<UploadedMeme[]>([]);
 
   // 마운트 때 한 번, 그리고 훅이 서버 목록을 다 읽어온(isLoaded) 뒤에 한 번 더 가져옴
   useEffect(() => {
@@ -670,41 +675,32 @@ const MyPage = () => {
     }
   }, [isLoaded]);
 
-  // 업로드한 밈은 예전 더미 그대로
-  const gifUrls = [
-    'https://d23breqm38jov9.cloudfront.net/memes/kpop_6.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_giselle_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_karina_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_ningning_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_ningning_2.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_winter_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_2.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_3.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_4.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_5.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie.jpg',
-  ];
-  const getRandomGifUrl = () => gifUrls[Math.floor(Math.random() * gifUrls.length)];
+  // 내가 업로드한 밈 목록 불러오기
+  useEffect(() => {
+    const loadMyMemes = async () => {
+      try {
+        const response = await getMyMemes(1, 100); // 페이지 1, 사이즈 100
+        const mapped: UploadedMeme[] = (response.data || []).map((item: MyMemeItem) => ({
+          id: String(item.memeId),
+          gifUrl: item.imageUrl,
+          tags: [], // API 응답에 tags가 없으므로 빈 배열
+          viewCount: item.usageCnt,
+          likeCount: 0, // API 응답에 없음
+          uploadedAt: item.createdAt,
+          usageCnt: item.usageCnt,
+          downloadCnt: item.downloadCnt,
+        }));
+        setUploadedMemes(mapped);
+      } catch (e) {
+        console.error('내가 업로드한 밈 로드 실패:', e);
+      }
+    };
 
-  const [uploadedMemes] = useState<UploadedMeme[]>([
-    {
-      id: '1',
-      gifUrl: getRandomGifUrl(),
-      tags: ['NMIXX', '해원', '귀여운'],
-      viewCount: 0,
-      likeCount: 0,
-      uploadedAt: '2024-01-15',
-    },
-    {
-      id: '2',
-      gifUrl: getRandomGifUrl(),
-      tags: ['NMIXX', '릴리', '멋진'],
-      viewCount: 0,
-      likeCount: 0,
-      uploadedAt: '2024-01-14',
-    },
-  ]);
+    if (myUser) {
+      loadMyMemes();
+    }
+  }, [myUser]);
+
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -985,7 +981,15 @@ const MyPage = () => {
           {currentTab === 1 && uploadedMemes.length > 0 && (
             <MasonryGrid>
               {uploadedMemes.map((meme) => (
-                <MemeCard key={meme.id} {...meme} />
+                <MemeCard
+                  key={meme.id}
+                  id={meme.id}
+                  gifUrl={meme.gifUrl}
+                  tags={meme.tags}
+                  viewCount={meme.viewCount}
+                  likeCount={meme.likeCount}
+                  isFavorite={false}
+                />
               ))}
             </MasonryGrid>
           )}

@@ -378,7 +378,8 @@ const HomePage = () => {
         const response = await getRandomMemes(1, 20);
         setAllMemes(response.data.items);
         setCurrentPage(1);
-        setHasMore(response.data.items.length < response.data.total);
+        // 받아온 아이템이 요청한 size보다 적으면 더 이상 없음
+        setHasMore(response.data.items.length >= 20);
       } catch (error) {
         console.error('초기 밈 로드 실패:', error);
       } finally {
@@ -401,8 +402,8 @@ const HomePage = () => {
       setAllMemes((prev) => [...prev, ...response.data.items]);
       setCurrentPage(nextPage);
 
-      const totalLoaded = allMemes.length + response.data.items.length;
-      if (totalLoaded >= response.data.total || response.data.items.length === 0) {
+      // 받아온 아이템이 요청한 size(12)보다 적으면 더 이상 없음
+      if (response.data.items.length < 12) {
         setHasMore(false);
       }
     } catch (error) {
@@ -410,7 +411,7 @@ const HomePage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, isLoading, hasMore, allMemes.length]);
+  }, [currentPage, isLoading, hasMore]);
 
   // 스크롤 감지
   const { ref: loadMoreRef } = useInView({
