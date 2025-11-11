@@ -4,6 +4,7 @@ import { Card, CardMedia, Chip, IconButton, Box, Fade } from '@mui/material';
 import { Download, Star } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import LoginModal from '../common/LoginModal';
+import { logMemeUsage } from '../../api/memeService';
 
 interface MemeCardProps {
   id: string;
@@ -35,6 +36,9 @@ const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite }: MemeCardPr
     }
     
     try {
+      // 다운로드 로그 기록
+      await logMemeUsage(Number(id), 'DOWNLOAD');
+      
       // GIF 다운로드
       const response = await fetch(gifUrl);
       const blob = await response.blob();
