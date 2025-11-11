@@ -572,6 +572,8 @@ import { verifyPassword } from '../api/userService';
 import type { MyUser } from '../types/mypage';
 import { fetchMyFavoriteMemes } from '../api/memeFavorite';
 import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
+import NicknameWithRank from '../components/common/NicknameWithRank';
+import RankProgress from '../components/common/RankProgress';
 
 // 마이페이지에서 카드에 넘길 형태
 type FavoriteMemeForPage = {
@@ -797,7 +799,7 @@ const MyPage = () => {
                     {user.nickname?.charAt(0).toUpperCase()}
                   </Avatar>
                   <Chip
-                    label={`업로드한 밈 ${user.uploadedMemesCount}개`}
+                    label={`업로드한 밈 ${uploadedMemes.length}개`}
                     sx={{ bgcolor: 'rgba(147, 51, 234, 0.1)', color: '#9333EA', fontWeight: 700 }}
                   />
                 </Box>
@@ -852,11 +854,27 @@ const MyPage = () => {
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Typography sx={{ width: 100, color: '#6B7280', fontSize: '0.875rem' }}>닉네임</Typography>
-                      <Typography sx={{ fontSize: '0.875rem' }}>{user.nickname}</Typography>
+                      <Typography sx={{ fontSize: '0.875rem' }}>
+                        <NicknameWithRank
+                          nickname={user.nickname}
+                          rankLevel={myUser?.userRank?.rankLevel ?? "GREEN"}
+                          badgeSize={18}
+                        />
+                      </Typography>
                     </Box>
                   </Box>
                 </Box>
               </Box>
+
+              {/* 하단: 랭크 진행도 영역 */}
+              {myUser?.userRank && (
+                <Box sx={{ mt: 4 }}>
+                  <RankProgress
+                    rankLevel={myUser.userRank.rankLevel}
+                    roomCreateCount={uploadedMemes.length}
+                  />
+                </Box>
+              )}
             </CardContent>
           </Card>
         )}

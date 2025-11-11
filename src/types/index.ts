@@ -10,6 +10,7 @@ export type User = {
   bannedTill?: string;
   imgUrl?: string;
   language: string;
+  userRank?: UserRank;
 };
 
 /**
@@ -24,3 +25,16 @@ export interface RecommendedUser {
   reasons: string[];
   following: boolean;
 }
+
+/**
+ * 랭크 레벨 타입
+ */
+export type RankLevel = "VIP" | "GOLD" | "PURPLE" | "YELLOW" | "GREEN";
+
+/**
+ * 유저 랭크 정보
+ */
+export type UserRank = {
+  roomCreateCount: number;
+  rankLevel: RankLevel;
+};

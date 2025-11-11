@@ -1,3 +1,5 @@
+import type { UserRank } from './index';
+
 export type MyUser = {
   userId: string;
   email: string;
@@ -11,6 +13,7 @@ export type MyUser = {
   imgUrl?: string;
   penaltyList: any[];
   socialLogin?: boolean;
+  userRank?: UserRank;
 };
 
 export type OtherUser = {

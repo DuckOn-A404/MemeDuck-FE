@@ -251,7 +251,7 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
 
             {myUser ? (
               <>
-                {/* 로그인 상태: 닉네임 + 유저 아이콘 */}
+                {/* 로그인 상태: 닉네임 + 유저 아이콘 + 랭크 뱃지 */}
                 <Box
                   sx={{
                     display: { xs: 'none', sm: 'flex' },
@@ -273,24 +273,42 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
                     {myUser.nickname}
                   </Box>
                 </Box>
-                <Avatar
-                  onClick={handleUserIconClick}
-                  src={myUser?.imgUrl || '/default_image.png'}
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: '2px solid rgba(255, 255, 255, 0.4)',
-                    '&:hover': {
-                      borderColor: 'rgba(255, 255, 255, 0.7)',
-                      transform: 'scale(1.1)',
-                      boxShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
-                    },
-                  }}
-                >
-                  {myUser?.nickname?.charAt(0).toUpperCase() || 'U'}
-                </Avatar>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Avatar
+                    onClick={handleUserIconClick}
+                    src={myUser?.imgUrl || '/default_image.png'}
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      border: '2px solid rgba(255, 255, 255, 0.4)',
+                      '&:hover': {
+                        borderColor: 'rgba(255, 255, 255, 0.7)',
+                        transform: 'scale(1.1)',
+                        boxShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
+                      },
+                    }}
+                  >
+                    {myUser?.nickname?.charAt(0).toUpperCase() || 'U'}
+                  </Avatar>
+                  {/* 랭크 뱃지 - 프로필 오른쪽 */}
+                  {myUser.userRank && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <img
+                        src={`/badge/${myUser.userRank.rankLevel.toLowerCase()}_badge.png`}
+                        alt={myUser.userRank.rankLevel}
+                        style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                      />
+                    </Box>
+                  )}
+                </Box>
               </>
             ) : (
               <>
