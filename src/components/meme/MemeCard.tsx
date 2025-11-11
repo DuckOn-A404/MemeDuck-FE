@@ -71,6 +71,7 @@ const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite }: MemeCardPr
   };
 
   return (
+    <>
     <Card
       onClick={handleCardClick}
       onMouseEnter={() => setHover(true)}
@@ -215,10 +216,11 @@ const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite }: MemeCardPr
           </Box>
         </Fade>
       </Box>
-
-      {/* 로그인 모달 */}
-      <LoginModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </Card>
+    
+    {/* 로그인 모달 - Card 외부로 이동하여 이벤트 버블링 방지 */}
+    <LoginModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
+    </>
   );
 };
 
