@@ -124,12 +124,11 @@ export interface MemeUsageResponse {
 }
 
 export const logMemeUsage = async (
-  memeId: number,
-  usageType: 'USE' | 'DOWNLOAD'
+  memeId: number
 ): Promise<MemeUsageResponse> => {
   const response = await api.post<MemeUsageResponse>('/memes/usage', {
     memeId,
-    usageType,
+    usageType: 'DOWNLOAD',
   });
 
   return response.data;

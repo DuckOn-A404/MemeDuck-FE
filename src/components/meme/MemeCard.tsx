@@ -37,7 +37,7 @@ const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite }: MemeCardPr
     
     try {
       // 다운로드 로그 기록
-      await logMemeUsage(Number(id), 'DOWNLOAD');
+      await logMemeUsage(Number(id));
       
       // GIF 다운로드
       const response = await fetch(gifUrl);
