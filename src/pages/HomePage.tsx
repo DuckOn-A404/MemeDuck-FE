@@ -375,11 +375,11 @@ const HomePage = () => {
     const loadInitialMemes = async () => {
       try {
         setIsInitialLoading(true);
-        const response = await getRandomMemes(1, 20);
+        const response = await getRandomMemes(1, 30);
         setAllMemes(response.data.items);
         setCurrentPage(1);
         // 받아온 아이템이 요청한 size보다 적으면 더 이상 없음
-        setHasMore(response.data.items.length >= 20);
+        setHasMore(response.data.items.length >= 30);
       } catch (error) {
         console.error('초기 밈 로드 실패:', error);
       } finally {
@@ -397,13 +397,13 @@ const HomePage = () => {
     try {
       setIsLoading(true);
       const nextPage = currentPage + 1;
-      const response = await getRandomMemes(nextPage, 12);
+      const response = await getRandomMemes(nextPage, 30);
 
       setAllMemes((prev) => [...prev, ...response.data.items]);
       setCurrentPage(nextPage);
 
-      // 받아온 아이템이 요청한 size(12)보다 적으면 더 이상 없음
-      if (response.data.items.length < 12) {
+      // 받아온 아이템이 요청한 size(30)보다 적으면 더 이상 없음
+      if (response.data.items.length < 30) {
         setHasMore(false);
       }
     } catch (error) {
