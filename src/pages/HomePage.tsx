@@ -351,7 +351,7 @@ const HomePage = () => {
       try {
         setIsTopLoading(true);
         const res = await getTopMemes(); // /memes/top
-        setTopMemes(res.data.items.slice(0, 10));
+        setTopMemes(res.data.items.slice(0, 8));
       } catch (err) {
         console.error('탑 밈 로드 실패:', err);
         setTopMemes([]);
@@ -463,7 +463,7 @@ const HomePage = () => {
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                인기 밈 TOP 10
+                인기 밈 TOP 8
               </Typography>
             </Box>
 
