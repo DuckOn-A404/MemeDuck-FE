@@ -104,6 +104,10 @@ export const getTopMemes = async (): Promise<TopMemesResponse> => {
   return response.data;
 }
 
+export async function fetchMemeDetail(memeId: number | string) {
+  const res = await api.get(`/memes/${memeId}/detail`);
+  return res.data.data;  
+}
 /**
  * 밈 사용/다운로드 로그 기록 API
  * POST /api/memes/usage

@@ -16,7 +16,7 @@ const LoginPage = () => {
 
   const setUser = useUserStore((state) => state.setMyUser);
 
-  const API_BASE_URL = import.meta.env.VITE_OAUTH2_BASE_URL ?? "";
+  // const API_BASE_URL = import.meta.env.VITE_OAUTH2_BASE_URL ?? "";
 
   const handleLogin = async () => {
     setError("");
@@ -110,7 +110,7 @@ const LoginPage = () => {
           <div className="flex-grow h-px bg-gray-300" />
         </div>
         {/* Google 로그인 */}
-        <a
+        {/* <a
           href={`${API_BASE_URL}/oauth2/authorization/google`}
           className="w-full flex items-center justify-center gap-2 border border-gray-300 py-3 rounded-xl text-sm font-medium text-gray-700 mb-3 transition-colors hover:bg-gray-50"
         >
@@ -139,7 +139,7 @@ const LoginPage = () => {
             />
           </svg>
           Google로 계속하기
-        </a>
+        </a> */}
         {/* Kakao 로그인 */}
         {/* <a
           href={`${API_BASE_URL}/oauth2/authorization/kakao`}
