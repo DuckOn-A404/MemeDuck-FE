@@ -91,6 +91,9 @@ const UploadPage = () => {
     onDrop,
     accept: {
       'image/gif': ['.gif'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp'],
       'video/mp4': ['.mp4'],
       'video/webm': ['.webm'],
     },
@@ -234,7 +237,7 @@ const UploadPage = () => {
     {
       step: 1,
       title: '지원 파일 형식',
-      description: 'GIF, MP4, WebM 형식의 파일을 업로드할 수 있습니다.',
+      description: 'GIF, JPG, PNG, WebP, MP4, WebM 형식의 파일을 업로드할 수 있습니다.',
       icon: '📁',
     },
     {
@@ -352,7 +355,7 @@ const UploadPage = () => {
                   {isDragActive ? '여기에 놓아주세요' : '파일을 드래그하거나 클릭하세요'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                  GIF, MP4, WebM 파일을 업로드할 수 있습니다
+                  GIF, JPG, PNG, WebP, MP4, WebM 파일을 업로드할 수 있습니다
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
                   최대 1개 파일 · 동영상 최대 20MB
