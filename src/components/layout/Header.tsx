@@ -4,6 +4,7 @@ import { Upload, UserCircle, LogOut, Search, Trophy } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, LayoutGroup } from 'framer-motion';
 import { useUserStore } from '../../store/useUserStore';
+import { logSearchKeyword } from '../../api/tagService';
 
 interface HeaderProps {
   showSearchBar?: boolean;
@@ -44,10 +45,16 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
     }
   }, [isScrolled, searchFocused, showSearchBar]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim();
     if (q) {
+      // 1. 검색 로그 기록 (비동기, 실패해도 검색은 진행)
+      logSearchKeyword(q).catch((err) => {
+        console.warn('검색 로그 기록 실패:', err);
+      });
+      
+      // 2. 검색 페이지로 이동
       navigate(`/search/${encodeURIComponent(q)}`);
     }
   };
