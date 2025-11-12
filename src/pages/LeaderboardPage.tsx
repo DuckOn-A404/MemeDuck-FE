@@ -12,7 +12,7 @@ const LeaderboardPage = () => {
   useEffect(() => {
     const loadLeaderboard = async () => {
       try {
-        const response = await getUserLeaderboard(0, 10);
+        const response = await getUserLeaderboard(0, 50);
         setLeaderboard(response.data || []);
       } catch (error) {
         console.error('리더보드 로드 실패:', error);
@@ -278,7 +278,7 @@ const LeaderboardPage = () => {
         {rest.length > 0 && (
           <Box>
             <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
-              📊 4위 ~ 10위
+              📊 4위 ~ 50위
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {rest.map((user, index) => {
