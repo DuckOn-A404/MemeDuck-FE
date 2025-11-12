@@ -117,25 +117,54 @@ const Header = ({ showSearchBar = false }: HeaderProps) => {
             }}
           >
           {/* 로고 */}
-          <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center' }}>
-                <img src="/duck.svg" alt="MEMEDUCK" style={{ width: '100%', height: '100%' }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center' }}>
+                  <img src="/duck.svg" alt="MEMEDUCK" style={{ width: '100%', height: '100%' }} />
+                </Box>
+                <Box
+                  sx={{
+                    fontSize: '1.25rem',
+                    fontWeight: 800,
+                    color: 'white',
+                    letterSpacing: '-0.02em',
+                    display: { xs: 'none', sm: 'block' },
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  MEMEDUCK
+                </Box>
               </Box>
-              <Box
-                sx={{
-                  fontSize: '1.25rem',
-                  fontWeight: 800,
-                  color: 'white',
-                  letterSpacing: '-0.02em',
-                  display: { xs: 'none', sm: 'block' },
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                }}
-              >
-                MEMEDUCK
-              </Box>
+            </Link>
+            
+            {/* DuckOn 링크 버튼 */}
+            <Box
+              component="a"
+              href="https://duckon.site"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                px: 2,
+                py: 0.75,
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                color: 'white',
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: 2,
+                textDecoration: 'none',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.3)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(255, 255, 255, 0.2)',
+                },
+              }}
+            >
+              DuckOn
             </Box>
-          </Link>
+          </Box>
 
           {/* 검색창 (스크롤 시 헤더 내부) */}
           {showSearchBar && isScrolled && (
