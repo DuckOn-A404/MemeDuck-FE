@@ -173,3 +173,39 @@ export const getMyMemes = async (
 
   return response.data;
 };
+
+/**
+ * 태그 기반 밈 검색 API
+ * GET /api/memes/search-basic
+ * 
+ * @param tag - 검색할 태그 (부분 일치)
+ * @param page - 페이지 번호 (기본값: 1)
+ * @param size - 페이지 크기 (기본값: 10)
+ * @returns 검색된 밈 목록
+ */
+export interface SearchMemesResponse {
+  status: number;
+  message: string;
+  data: {
+    page: number;
+    size: number;
+    total: number;
+    items: MemeItem[];
+  };
+}
+
+export const searchMemesByTag = async (
+  tag: string,
+  page: number = 1,
+  size: number = 10
+): Promise<SearchMemesResponse> => {
+  const response = await api.get<SearchMemesResponse>('/memes/search-basic', {
+    params: {
+      tag,
+      page,
+      size,
+    },
+  });
+
+  return response.data;
+};

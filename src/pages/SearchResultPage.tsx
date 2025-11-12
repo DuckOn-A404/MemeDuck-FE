@@ -1,71 +1,87 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Box, Typography, Chip } from '@mui/material';
+import { Container, Box, Typography, Chip, CircularProgress } from '@mui/material';
 import { Search as SearchIcon } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
 import Header from '../components/layout/Header';
 import MasonryGrid from '../components/meme/MasonryGrid';
 import MemeCard from '../components/meme/MemeCard';
+import { searchMemesByTag, type MemeItem } from '../api/memeService';
+import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
 
 const SearchResultPage = () => {
   const { query } = useParams<{ query: string }>();
   
-  // HomePage와 동일한 GIF URL 사용
-  const gifUrls = [
-    'https://d23breqm38jov9.cloudfront.net/memes/kpop_6.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_giselle_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_karina_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_ningning_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_ningning_2.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/aespa_winter_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_2.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_3.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_4.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie_5.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie.jpg',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jennie1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/blackpink_jisoo.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/bts_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/bts_suga_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/ive_leeseo_1.jpg',
-    'https://d23breqm38jov9.cloudfront.net/memes/kpop_1.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/kpop_2.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/kpop_3.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/kpop_4.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/kpop_5.gif',
-    'https://d23breqm38jov9.cloudfront.net/memes/lesserafim_hyj_1.jpg',
-    'https://d23breqm38jov9.cloudfront.net/memes/produce.gif',
-  ];
+  // 즐겨찾기 훅
+  const { favoriteIds, toggleFavorite, isLoaded } = useFavoriteMemes();
   
-  const getRandomGifUrl = () => gifUrls[Math.floor(Math.random() * gifUrls.length)];
-  
-  // 검색 결과 더미 데이터 (실제로는 API 호출)
-  const [searchResults, setSearchResults] = useState(() =>
-    Array.from({ length: 12 }, (_, i) => ({
-      id: `search-${i}`,
-      gifUrl: getRandomGifUrl(),
-      tags: ['NMIXX', '해원', '배이', query || '검색어'],
-      viewCount: Math.floor(Math.random() * 50000) + 10000,
-      likeCount: Math.floor(Math.random() * 5000) + 500,
-      isLiked: Math.random() > 0.5,
-    }))
-  );
+  // 검색 결과 상태
+  const [searchResults, setSearchResults] = useState<MemeItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // 검색어가 변경될 때마다 결과 재생성 (실제로는 API 호출)
+  // 초기 검색 결과 로드
   useEffect(() => {
-    if (query) {
-      // 실제로는 API 호출: fetch(`/api/search?q=${query}`)
-      const newResults = Array.from({ length: 12 }, (_, i) => ({
-        id: `search-${query}-${i}`,
-        gifUrl: getRandomGifUrl(),
-        tags: ['NMIXX', '해원', '배이', query],
-        viewCount: Math.floor(Math.random() * 50000) + 10000,
-        likeCount: Math.floor(Math.random() * 5000) + 500,
-        isLiked: Math.random() > 0.5,
-      }));
-      setSearchResults(newResults);
-    }
+    if (!query) return;
+
+    const loadInitialResults = async () => {
+      try {
+        setIsInitialLoading(true);
+        setSearchResults([]);
+        setCurrentPage(1);
+        setHasMore(true);
+        
+        const response = await searchMemesByTag(query, 1, 30);
+        setSearchResults(response.data.items);
+        setTotalResults(response.data.total);
+        setHasMore(response.data.items.length >= 30);
+      } catch (error) {
+        console.error('검색 실패:', error);
+        setSearchResults([]);
+        setTotalResults(0);
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    loadInitialResults();
   }, [query]);
+
+  // 더 많은 검색 결과 로드
+  const loadMoreResults = useCallback(async () => {
+    if (isLoading || !hasMore || !query) return;
+
+    try {
+      setIsLoading(true);
+      const nextPage = currentPage + 1;
+      const response = await searchMemesByTag(query, nextPage, 30);
+
+      setSearchResults((prev) => [...prev, ...response.data.items]);
+      setCurrentPage(nextPage);
+
+      if (response.data.items.length < 30) {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('추가 검색 결과 로드 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, isLoading, hasMore, query]);
+
+  // 스크롤 감지
+  const { ref: loadMoreRef } = useInView({
+    threshold: 0,
+    rootMargin: '800px',
+    onChange: (inView) => {
+      if (inView && hasMore && !isLoading) {
+        loadMoreResults();
+      }
+    },
+  });
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#FAFAFA' }}>
@@ -122,7 +138,7 @@ const SearchResultPage = () => {
                     }}
                   />
                   <Typography variant="body2" color="text.secondary">
-                    · {searchResults.length}개의 결과
+                    · {totalResults}개의 결과
                   </Typography>
                 </Box>
               </Box>
@@ -130,12 +146,64 @@ const SearchResultPage = () => {
           </Box>
 
           {/* 검색 결과 밈 그리드 */}
-          {searchResults.length > 0 ? (
-            <MasonryGrid>
-              {searchResults.map((meme) => (
-                <MemeCard key={meme.id} {...meme} />
-              ))}
-            </MasonryGrid>
+          {isInitialLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress size={40} sx={{ color: '#9333EA' }} />
+            </Box>
+          ) : searchResults.length > 0 ? (
+            <>
+              <MasonryGrid>
+                {searchResults.map((meme, index) => {
+                  const idStr = meme.memeId.toString();
+                  return (
+                    <MemeCard
+                      key={`${meme.memeId}-${index}`}
+                      id={idStr}
+                      gifUrl={meme.memeUrl}
+                      tags={meme.tags}
+                      viewCount={0}
+                      likeCount={0}
+                      isFavorite={isLoaded && favoriteIds.has(idStr)}
+                      onToggleFavorite={(id) => toggleFavorite(id)}
+                    />
+                  );
+                })}
+              </MasonryGrid>
+
+              {/* 무한 스크롤 로딩 표시 */}
+              {hasMore && (
+                <Box ref={loadMoreRef} sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  {isLoading && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        px: 4,
+                        py: 2,
+                        bgcolor: 'white',
+                        borderRadius: 3,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      }}
+                    >
+                      <CircularProgress size={20} sx={{ color: '#9333EA' }} />
+                      <Typography variant="body2" fontWeight={600} color="text.secondary">
+                        더 많은 결과 불러오는 중...
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              )}
+
+              {/* 모든 결과를 다 불러왔을 때 */}
+              {!hasMore && searchResults.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <Typography variant="body2" fontWeight={600} color="text.secondary">
+                    모든 검색 결과를 불러왔습니다 🎉
+                  </Typography>
+                </Box>
+              )}
+            </>
           ) : (
             <Box
               sx={{
