@@ -152,14 +152,24 @@ const UploadPage = () => {
           const input = f.tagInput.trim();
           if (!input) return f;
 
-          // #으로 구분된 태그들을 추출
-          const hashtagRegex = /#[\w가-힣]+/g;
-          const hashTags = input.match(hashtagRegex) || [];
-          
-          // #을 제거하고 중복 제거
-          const newTags = hashTags
-            .map(tag => tag.substring(1)) // # 제거
-            .filter(tag => tag && !f.tags.includes(tag)); // 중복 제거
+          let newTags: string[] = [];
+
+          // #이 포함되어 있으면 해시태그로 파싱
+          if (input.includes('#')) {
+            const hashtagRegex = /#[\w가-힣]+/g;
+            const hashTags = input.match(hashtagRegex) || [];
+            
+            newTags = hashTags
+              .map(tag => tag.substring(1)) // # 제거
+              .filter(tag => tag.length > 0 && tag.length <= 15) // 15자 제한
+              .filter(tag => !f.tags.includes(tag)); // 중복 제거
+          } else {
+            // #이 없으면 단일 태그로 처리 (15자 제한)
+            const singleTag = input.slice(0, 15);
+            if (singleTag && !f.tags.includes(singleTag)) {
+              newTags = [singleTag];
+            }
+          }
 
           // 기존 태그와 합치되, 최대 10개까지만
           const combinedTags = [...f.tags, ...newTags].slice(0, 10);
