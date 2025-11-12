@@ -23,7 +23,7 @@ import {
 import Header from "../components/layout/Header";
 import { getMediaInfo, formatDuration } from "../utils/mediaUtils";
 import { useFavoriteMemes } from "../hooks/useFavoriteMemes";
-import { fetchMemeDetail } from "../api/memeService";
+import { fetchMemeDetail, logMemeUsage } from "../api/memeService";
 import ShareModal from "../components/common/ShareModal";
 
 
@@ -183,6 +183,10 @@ const MemeDetailPage = () => {
   const handleDownload = async () => {
     if (!meme) return;
     try {
+      // 다운로드 로그 기록
+      await logMemeUsage(Number(meme.id));
+      
+      // 실제 다운로드 수행
       const response = await fetch(meme.gifUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
