@@ -4,7 +4,7 @@ import type { UserRank } from "../types";
 
 // 현재 사용자 정보 조회
 export const fetchMyProfile = async (): Promise<MyUser> => {
-  const response = await api.get<MyUser>("/users/me");
+  const response = await api.get<MyUser>("/me");
   return response.data;
 };
 
@@ -18,7 +18,7 @@ export const fetchOtherUserProfile = async (
 
 // 비밀번호 검증 (일반 로그인 계정)
 export const verifyPassword = async (password: string): Promise<boolean> => {
-  const res = await api.post<{ valid: boolean }>("/users/me/verify-password", { password });
+  const res = await api.post<{ valid: boolean }>("/me/verify-password", { password });
   return res.data?.valid === true;
 };
 
@@ -43,7 +43,7 @@ export const updateUserProfile = async (formData: FormData): Promise<MyUser> => 
     fd.append(key, value as any);
   }
 
-  const res = await api.patch<MyUser>("/users/me", fd);
+  const res = await api.patch<MyUser>("/me", fd);
   return res.data;
 };
 
