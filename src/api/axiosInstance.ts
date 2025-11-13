@@ -86,9 +86,9 @@ api.interceptors.request.use((config) => {
     config.timeout = 50000;
   }
   
-  // 밈 업로드 엔드포인트는 타임아웃 60초로 설정 (큰 파일 업로드 대응)
+  // 밈 업로드 엔드포인트는 타임아웃 10초로 설정 (큰 파일 업로드 대응)
   if (/^\/memes\/create(\/|$)/.test(url)) {
-    config.timeout = 60000;
+    config.timeout = 10000;
   }
 
   if (isAuthEndpoint) return config;
