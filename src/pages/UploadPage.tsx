@@ -28,6 +28,7 @@ import {
   Sparkles,
   Info,
 } from 'lucide-react';
+import { AxiosError } from 'axios';
 import Header from '../components/layout/Header';
 import { useUserStore } from '../store/useUserStore';
 import { createMemes } from '../api/memeService';
@@ -49,6 +50,11 @@ const UploadPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentGuideStep, setCurrentGuideStep] = useState(0);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const [errorDialog, setErrorDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+  }>({ open: false, title: '', message: '' });
 
   const formatFileName = useCallback((name: string, max = 20) => {
     if (name.length > max) return name.slice(0, max) + '....';
@@ -60,7 +66,11 @@ const UploadPage = () => {
     if (fileRejections && fileRejections.length > 0) {
       const hasTooLargeVideo = fileRejections.some(r => r.file?.type?.startsWith('video/') && r.errors?.some((e: any) => e.code === 'file-too-large'));
       if (hasTooLargeVideo) {
-        alert('동영상은 최대 20MB까지 업로드할 수 있습니다.');
+        setErrorDialog({
+          open: true,
+          title: '파일 크기 초과',
+          message: '동영상은 최대 20MB까지 업로드할 수 있습니다. 더 작은 파일을 선택해주세요.',
+        });
       }
     }
     // 최대 1개까지만 업로드 가능
@@ -210,6 +220,19 @@ const UploadPage = () => {
     const allFilesHaveTags = uploadedFiles.every(f => f.tags.length > 0);
     if (uploadedFiles.length === 0 || !allFilesHaveTags) return;
 
+    // 파일 크기 체크 (20MB 제한)
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+    const oversizedFile = uploadedFiles.find(f => f.file.size > MAX_FILE_SIZE);
+    
+    if (oversizedFile) {
+      setErrorDialog({
+        open: true,
+        title: '파일 용량 초과',
+        message: `업로드하려는 파일의 용량이 너무 큽니다.\n\n파일 크기: ${(oversizedFile.file.size / 1024 / 1024).toFixed(2)}MB\n최대 허용: 20MB\n\n파일 크기를 줄이거나 더 작은 파일을 선택해주세요.`,
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
@@ -218,15 +241,60 @@ const UploadPage = () => {
       const tags = uploadedFiles.map(f => f.tags);
 
       // API 호출
-      const response = await createMemes(files, tags);
-      
-      console.log('밈 업로드 성공:', response);
+      await createMemes(files, tags);
       
       // 성공 시 홈으로 이동
       navigate('/');
     } catch (error) {
-      console.error('밈 업로드 실패:', error);
-      alert('밈 업로드에 실패했습니다. 다시 시도해주세요.');
+      let errorTitle = '업로드 실패';
+      let errorMessage = '밈 업로드에 실패했습니다. 다시 시도해주세요.';
+      
+      // AxiosError 타입 체크
+      if (error instanceof AxiosError) {
+        const errorMsg = error.message?.toLowerCase() || '';
+        
+        // 413 에러 감지 (응답, 메시지 모두 체크)
+        const is413Error = 
+          error.response?.status === 413 ||
+          errorMsg.includes('413') ||
+          errorMsg.includes('content too large') ||
+          errorMsg.includes('payload too large');
+        
+        if (is413Error) {
+          errorTitle = '파일 용량 초과';
+          errorMessage = '업로드하려는 파일의 용량이 너무 큽니다.\n\n최대 허용 크기: 20MB\n파일 크기를 줄이거나 더 작은 파일을 선택해주세요.';
+        } else if (error.response) {
+          // 응답이 있는 경우 (서버에서 응답을 받음)
+          const status = error.response.status;
+          
+          if (status === 400) {
+            errorTitle = '잘못된 요청';
+            errorMessage = error.response.data?.message || '업로드 요청이 올바르지 않습니다. 파일 형식과 태그를 확인해주세요.';
+          } else if (status === 401 || status === 403) {
+            errorTitle = '인증 오류';
+            errorMessage = '로그인이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.';
+          } else if (status === 500) {
+            errorTitle = '서버 오류';
+            errorMessage = '서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          } else if (error.response.data?.message) {
+            errorMessage = error.response.data.message;
+          }
+        } else if (error.request) {
+          // 요청은 보냈지만 응답을 받지 못한 경우
+          errorTitle = '네트워크 오류';
+          errorMessage = '서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.';
+        }
+      } else {
+        // Axios 에러가 아닌 경우
+        errorTitle = '알 수 없는 오류';
+        errorMessage = '예상치 못한 오류가 발생했습니다. 다시 시도해주세요.';
+      }
+      
+      setErrorDialog({
+        open: true,
+        title: errorTitle,
+        message: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -235,6 +303,11 @@ const UploadPage = () => {
   // 로그인 알림 닫기
   const handleCloseLoginAlert = () => {
     setShowLoginAlert(false);
+  };
+
+  // 에러 다이얼로그 닫기
+  const handleCloseErrorDialog = () => {
+    setErrorDialog({ open: false, title: '', message: '' });
   };
 
   // 로그인 페이지로 이동
@@ -920,6 +993,44 @@ const UploadPage = () => {
             }}
           >
             로그인하기
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 에러 알림 Dialog */}
+      <Dialog
+        open={errorDialog.open}
+        onClose={handleCloseErrorDialog}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 700, textAlign: 'center', color: '#DC2626' }}>
+          {errorDialog.title}
+        </DialogTitle>
+        <DialogContent>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ 
+              textAlign: 'center',
+              whiteSpace: 'pre-line',
+              lineHeight: 1.6,
+            }}
+          >
+            {errorDialog.message}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, justifyContent: 'center' }}>
+          <Button
+            onClick={handleCloseErrorDialog}
+            variant="contained"
+            sx={{
+              bgcolor: '#9333EA',
+              '&:hover': { bgcolor: '#7C3AED' },
+              minWidth: 100,
+            }}
+          >
+            확인
           </Button>
         </DialogActions>
       </Dialog>

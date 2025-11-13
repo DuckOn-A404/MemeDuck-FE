@@ -424,7 +424,12 @@ const HomePage = () => {
       const nextPage = currentPage + 1;
       const response = await getRandomMemes(nextPage, 30);
 
-      setAllMemes((prev) => [...prev, ...response.data.items]);
+      // memeId 기준으로 중복 제거
+      setAllMemes((prev) => {
+        const existingIds = new Set(prev.map(m => m.memeId));
+        const newItems = response.data.items.filter(item => !existingIds.has(item.memeId));
+        return [...prev, ...newItems];
+      });
       setCurrentPage(nextPage);
 
       // 받아온 아이템이 요청한 size(30)보다 적으면 더 이상 없음
