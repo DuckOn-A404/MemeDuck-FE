@@ -18,7 +18,7 @@ export const fetchOtherUserProfile = async (
 
 // 비밀번호 검증 (일반 로그인 계정)
 export const verifyPassword = async (password: string): Promise<boolean> => {
-  const res = await api.post<{ valid: boolean }>("/users/me/verify-password", { password });
+  const res = await api.post<{ valid: boolean }>("/me/verify-password", { password });
   return res.data?.valid === true;
 };
 
