@@ -4,6 +4,8 @@ import {
   postSignup,
   checkEmailExists,
   checkUserIdExists,
+  sendEmailVerificationCode,
+  verifyEmailCode,
 } from "../api/authService";
 
 type SignupData = {
@@ -45,6 +47,15 @@ export const useSignupForm = () => {
 
   const [emailChecked, setEmailChecked] = useState(false);
   const [userIdChecked, setUserIdChecked] = useState(false);
+
+  // 이메일 인증 관련 상태
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [codeError, setCodeError] = useState("");
+  const [codeSuccess, setCodeSuccess] = useState("");
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +106,12 @@ export const useSignupForm = () => {
       setEmailError("");
       setEmailSuccess("");
       setEmailChecked(false);
+      // 이메일 변경 시 인증 상태 초기화
+      setIsCodeSent(false);
+      setIsCodeVerified(false);
+      setVerificationCode("");
+      setCodeError("");
+      setCodeSuccess("");
       if (value && !isValidEmail(value)) {
         setEmailError("유효한 이메일 형식이 아닙니다.");
       }
@@ -129,7 +146,7 @@ export const useSignupForm = () => {
     e.preventDefault();
 
     if (!emailChecked) {
-      setError("이메일 중복 확인을 완료해주세요.");
+      setError("이메일 인증을 완료해주세요.");
       return;
     }
     if (!userIdChecked) {
@@ -195,9 +212,11 @@ export const useSignupForm = () => {
     }
   };
 
-  const handleCheckEmail = async () => {
+  // 이메일 인증번호 발송
+  const handleSendVerificationCode = async () => {
     setEmailError("");
-    setEmailSuccess("");
+    setCodeError("");
+    setCodeSuccess("");
 
     if (!formData.email) {
       setEmailError("이메일을 입력해주세요.");
@@ -208,13 +227,65 @@ export const useSignupForm = () => {
       return;
     }
 
+    // 먼저 이메일 중복 확인
     try {
       const res = await checkEmailExists(formData.email);
-      setEmailChecked(true);
-      if (res.isDuplicate) setEmailError("이미 사용 중인 이메일입니다.");
-      else setEmailSuccess("사용 가능한 이메일입니다.");
+      if (res.isDuplicate) {
+        setEmailError("이미 사용 중인 이메일입니다.");
+        return;
+      }
     } catch {
-      setEmailError("중복 확인 중 오류가 발생했습니다.");
+      setEmailError("이메일 확인 중 오류가 발생했습니다.");
+      return;
+    }
+
+    // 인증번호 발송
+    setSendingCode(true);
+    try {
+      const result = await sendEmailVerificationCode(formData.email);
+      if (result.sent) {
+        setIsCodeSent(true);
+        setCodeSuccess("인증번호가 발송되었습니다.");
+        setEmailSuccess("인증번호를 확인해주세요.");
+      } else {
+        setCodeError(result.message || "인증번호 발송에 실패했습니다.");
+      }
+    } catch (err: any) {
+      setCodeError(
+        err.response?.data?.message || "인증번호 발송 중 오류가 발생했습니다."
+      );
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  // 이메일 인증번호 검증
+  const handleVerifyCode = async () => {
+    setCodeError("");
+    setCodeSuccess("");
+
+    if (!verificationCode) {
+      setCodeError("인증번호를 입력해주세요.");
+      return;
+    }
+
+    setVerifyingCode(true);
+    try {
+      const result = await verifyEmailCode(formData.email, verificationCode);
+      if (result.verified) {
+        setIsCodeVerified(true);
+        setEmailChecked(true);
+        setCodeSuccess("이메일 인증이 완료되었습니다.");
+        setEmailSuccess("인증 완료");
+      } else {
+        setCodeError(result.message || "인증번호가 일치하지 않습니다.");
+      }
+    } catch (err: any) {
+      setCodeError(
+        err.response?.data?.message || "인증 확인 중 오류가 발생했습니다."
+      );
+    } finally {
+      setVerifyingCode(false);
     }
   };
 
@@ -248,12 +319,22 @@ export const useSignupForm = () => {
     userIdError,
     emailSuccess,
     userIdSuccess,
-    handleCheckEmail,
     handleCheckUserId,
     emailChecked,
     userIdChecked,
     passwordConfirmError,
     passwordError,
     nicknameError,
+    // 이메일 인증 관련
+    verificationCode,
+    setVerificationCode,
+    isCodeSent,
+    isCodeVerified,
+    codeError,
+    codeSuccess,
+    sendingCode,
+    verifyingCode,
+    handleSendVerificationCode,
+    handleVerifyCode,
   };
 };
