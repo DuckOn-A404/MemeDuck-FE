@@ -13,8 +13,6 @@ export type EditProfileCardProps = {
 
 const DEFAULT_IMG = "/default_image.png";
 
-const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,}$/;
-
 const EditProfileCard = ({ user, onCancel, onUpdate }: EditProfileCardProps) => {
   const [nickname, setNickname] = useState(user.nickname);
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -26,13 +24,6 @@ const EditProfileCard = ({ user, onCancel, onUpdate }: EditProfileCardProps) => 
     title: string;
     message: string;
   }>({ open: false, title: '', message: '' });
-
-  const isSocial = !!(user as any).socialLogin;
-
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [newPasswordError, setNewPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -76,30 +67,11 @@ const EditProfileCard = ({ user, onCancel, onUpdate }: EditProfileCardProps) => 
   };
 
   const handleSubmit = async () => {
-    if (!isSocial && newPassword) {
-      if (!PASSWORD_REGEX.test(newPassword)) {
-        setNewPasswordError("영문, 숫자, 특수문자를 각각 1자 이상 포함하고 최소 8자여야 합니다.");
-        return;
-      } else {
-        setNewPasswordError("");
-      }
-      if (newPassword !== confirmPassword) {
-        setConfirmPasswordError("새 비밀번호와 확인이 일치하지 않습니다.");
-        return;
-      } else {
-        setConfirmPasswordError("");
-      }
-    }
-
     const fd = new FormData();
 
     const trimmedNick = nickname.trim();
     if (trimmedNick && trimmedNick !== user.nickname) {
       fd.append("nickname", trimmedNick);
-    }
-
-    if (!isSocial && newPassword) {
-      fd.append("newPassword", newPassword);
     }
 
     // 기본 이미지로 변경하는 경우: 실제 default_image.png 파일 전송
@@ -133,43 +105,12 @@ const EditProfileCard = ({ user, onCancel, onUpdate }: EditProfileCardProps) => 
       } as any);
 
       onUpdate(next);
-
-      setNewPassword("");
-      setConfirmPassword("");
     } catch (err) {
       setErrorDialog({
         open: true,
         title: '프로필 수정 실패',
         message: '프로필 수정 중 오류가 발생했습니다.\n다시 시도해주세요.',
       });
-    }
-  };
-
-  const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setNewPassword(val);
-
-    if (val && !PASSWORD_REGEX.test(val)) {
-      setNewPasswordError("영문, 숫자, 특수문자를 각각 1자 이상 포함하고 최소 8자여야 합니다.");
-    } else {
-      setNewPasswordError("");
-    }
-
-    if (confirmPassword && val !== confirmPassword) {
-      setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
-    } else {
-      setConfirmPasswordError("");
-    }
-  };
-
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setConfirmPassword(val);
-
-    if (newPassword && newPassword !== val) {
-      setConfirmPasswordError("비밀번호가 일치하지 않습니다.");
-    } else {
-      setConfirmPasswordError("");
     }
   };
 
@@ -240,28 +181,6 @@ const EditProfileCard = ({ user, onCancel, onUpdate }: EditProfileCardProps) => 
               <input id="nickname" className="w-full rounded-lg border border-gray-200 px-2 py-1" value={nickname} onChange={(e) => setNickname(e.target.value)} />
             </div>
           </div>
-
-          {!isSocial ? (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-[8rem,1fr] items-start gap-2 sm:gap-3">
-                <label className="text-gray-500 font-medium pt-2">새 비밀번호</label>
-                <div className="min-w-0 flex-1">
-                  <input type="password" className="w-full rounded-lg border border-gray-200 px-2 py-1" value={newPassword} onChange={handleNewPasswordChange} placeholder="영문/숫자/특수문자 포함, 8자 이상" />
-                  {newPasswordError && <p className="text-red-500 text-xs mt-1">{newPasswordError}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-[8rem,1fr] items-start gap-2 sm:gap-3">
-                <label className="text-gray-500 font-medium pt-2">비밀번호 확인</label>
-                <div className="min-w-0 flex-1">
-                  <input type="password" className="w-full rounded-lg border border-gray-200 px-2 py-1" value={confirmPassword} onChange={handleConfirmPasswordChange} />
-                  {confirmPasswordError && <p className="text-red-500 text-xs mt-1">{confirmPasswordError}</p>}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-xs text-gray-500">소셜 로그인 계정은 여기서 비밀번호를 변경할 수 없습니다.</div>
-          )}
         </div>
       </div>
     </div>

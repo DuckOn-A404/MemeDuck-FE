@@ -575,6 +575,7 @@ import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
 import NicknameWithRank from '../components/common/NicknameWithRank';
 import RankProgress from '../components/common/RankProgress';
 import { getMyMemes, type MyMemeItem } from '../api/memeService';
+import ChangePasswordModal from '../components/common/ChangePasswordModal';
 
 // 마이페이지에서 카드에 넘길 형태
 type FavoriteMemeForPage = {
@@ -707,6 +708,7 @@ const MyPage = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const isSocial = Boolean((myUser as any)?.socialLogin);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -822,6 +824,20 @@ const MyPage = () => {
                       >
                         프로필 수정
                       </Button>
+                      {!isSocial && (
+                        <Button
+                          variant="text"
+                          size="small"
+                          onClick={() => setShowChangePasswordModal(true)}
+                          sx={{
+                            color: '#9333EA',
+                            fontSize: '0.875rem',
+                            '&:hover': { bgcolor: 'rgba(147, 51, 234, 0.08)' },
+                          }}
+                        >
+                          비밀번호 변경
+                        </Button>
+                      )}
                       <IconButton size="small" onClick={handleMenuOpen} sx={{ color: '#6B7280' }}>
                         <MoreVertical size={20} />
                       </IconButton>
@@ -1001,6 +1017,12 @@ const MyPage = () => {
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
         onConfirm={handlePasswordConfirm}
+      />
+
+      {/* 비밀번호 변경 모달 */}
+      <ChangePasswordModal
+        open={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
       />
 
       {/* 계정 삭제 다이얼로그 */}

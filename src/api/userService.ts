@@ -47,6 +47,18 @@ export const updateUserProfile = async (formData: FormData): Promise<MyUser> => 
   return res.data;
 };
 
+// 비밀번호 변경 API
+export const changePassword = async (
+  currentPassword: string,
+  newPassword: string
+): Promise<{ status: number; message: string; data?: string }> => {
+  const response = await api.patch("/me/password", {
+    currentPassword,
+    newPassword,
+  });
+  return response.data;
+};
+
 // 리더보드 유저 타입
 export interface LeaderboardUser {
   nickname: string;
