@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@mui/material";
 import {
-  Heart,
+  Star,
   Download,
   Share2,
   Calendar,
@@ -55,6 +55,7 @@ const MemeDetailPage = () => {
   // API로 받아온 밈
   const [meme, setMeme] = useState<MemeDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [displayLikeCount, setDisplayLikeCount] = useState<number>(0);
 
   // 프론트에서 추가로 계산하는 메타데이터
   const [videoDuration, setVideoDuration] = useState<string | null>(null);
@@ -88,6 +89,7 @@ const MemeDetailPage = () => {
           },
         };
         setMeme(mapped);
+        setDisplayLikeCount(mapped.likeCount);
       } catch (e) {
         console.error("밈 디테일 가져오기 실패:", e);
       } finally {
@@ -175,7 +177,9 @@ const MemeDetailPage = () => {
 
   // 좋아요 토글
   const handleLike = () => {
-    if (!id) return;
+    if (!id || !meme) return;
+    const already = isFavorited;
+    setDisplayLikeCount((prev) => prev + (already ? -1 : 1));
     toggleFavorite(id);
   };
 
@@ -317,7 +321,14 @@ const MemeDetailPage = () => {
               <Button
                 variant="contained"
                 size="large"
-                startIcon={<Heart size={20} fill={isFavorited ? "white" : "none"} />}
+                startIcon={
+                  <Star
+                    size={20}
+                    strokeWidth={2.5}
+                    color={isFavorited ? "#facc15" : "white"}
+                    fill={isFavorited ? "#facc15" : "transparent"}
+                  />
+                }
                 onClick={handleLike}
                 sx={{
                   flex: 1,
@@ -337,7 +348,7 @@ const MemeDetailPage = () => {
                   transition: "all 0.3s ease",
                 }}
               >
-                좋아요 {(meme.likeCount + (isFavorited ? 1 : 0)).toLocaleString()}
+                좋아요 {displayLikeCount.toLocaleString()}
               </Button>
 
               <Button
