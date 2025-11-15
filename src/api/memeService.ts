@@ -15,7 +15,7 @@ export interface MemeCreateResponse {
 export interface MemeItem {
   memeId: number;
   memeUrl: string;
-  tags: string[];
+  tags?: string[];
 }
 
 export interface RandomMemesResponse {

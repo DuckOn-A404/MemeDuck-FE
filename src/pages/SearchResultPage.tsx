@@ -160,7 +160,7 @@ const SearchResultPage = () => {
                       key={`${meme.memeId}-${index}`}
                       id={idStr}
                       gifUrl={meme.memeUrl}
-                      tags={meme.tags}
+                      tags={meme.tags ?? []}
                       viewCount={0}
                       likeCount={0}
                       isFavorite={isLoaded && favoriteIds.has(idStr)}

@@ -517,7 +517,7 @@ const HomePage = () => {
                       key={idStr}
                       id={idStr}
                       gifUrl={meme.memeUrl}
-                      tags={meme.tags}
+                      tags={meme.tags ?? []}
                       viewCount={0}
                       likeCount={0}
                       isFavorite={isLoaded && favoriteIds.has(idStr)}
@@ -570,7 +570,7 @@ const HomePage = () => {
                       key={`${meme.memeId}-${index}`}
                       id={idStr}
                       gifUrl={meme.memeUrl}
-                      tags={meme.tags}
+                      tags={meme.tags ?? []}
                       viewCount={0}
                       likeCount={0}
                       isFavorite={isLoaded && favoriteIds.has(idStr)}
