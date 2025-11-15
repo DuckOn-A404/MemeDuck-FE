@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import OAuth2RedirectHandler from './pages/OAuth2RedirectHandler';
 import LeaderboardPage from './pages/LeaderboardPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 export const router = createBrowserRouter([
   {
@@ -50,4 +51,8 @@ export const router = createBrowserRouter([
   //   path: '/tag/:tagName',
   //   element: <TagPage />,
   // },
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
 ]);
