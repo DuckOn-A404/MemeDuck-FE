@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import UploadPage from './pages/UploadPage';
 import MyPage from './pages/MyPage';
+import OtherUserPage from './pages/OtherUserPage';
 import SearchResultPage from './pages/SearchResultPage';
 import MemeDetailPage from './pages/MemeDetailPage';
 import LoginPage from './pages/LoginPage';
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
   {
     path: '/mypage',
     element: <MyPage />,
+  },
+  {
+    path: '/user/:userId',
+    element: <OtherUserPage />,
   },
   {
     path: '/leaderboard',

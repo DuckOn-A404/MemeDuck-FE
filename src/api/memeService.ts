@@ -139,12 +139,60 @@ export const logMemeUsage = async (
 };
 
 /**
- * 내가 만든 밈 목록 조회 API
- * GET /api/memes/mine
+ * 유저의 밈 목록 조회 API (신규)
+ * GET /api/users/{userId}/memes
  * 
+ * @param userId - 유저 ID
  * @param page - 페이지 번호 (기본값: 1)
  * @param size - 페이지 크기 (기본값: 10)
- * @returns 내가 생성한 밈 목록
+ * @returns 유저가 생성한 밈 목록
+ */
+export interface UserMemeItem {
+  memeId: number;
+  memeUrl: string;
+}
+
+export interface UserMemesResponse {
+  status: number;
+  message: string;
+  data: {
+    page: number;
+    size: number;
+    total: number;
+    items: UserMemeItem[];
+  };
+}
+
+export const fetchUserMemes = async (
+  userId: string,
+  page: number = 1,
+  size: number = 10
+): Promise<UserMemesResponse> => {
+  const response = await api.get(`/users/${userId}/memes`, {
+    params: {
+      page,
+      size,
+    },
+    skipAuth: true, // JWT 필요 없음 (공개 API)
+  });
+
+  // 백엔드 응답: { status, message, data: { page, size, total, items } }
+  const apiData = response.data?.data;
+  return {
+    status: response.data?.status || 200,
+    message: response.data?.message || '',
+    data: {
+      page: apiData?.page || page,
+      size: apiData?.size || size,
+      total: apiData?.total || 0,
+      items: apiData?.items || [],
+    },
+  };
+};
+
+/**
+ * 내가 만든 밈 목록 조회 API (deprecated - fetchUserMemes 사용 권장)
+ * GET /api/memes/mine
  */
 export interface MyMemeItem {
   memeId: number;

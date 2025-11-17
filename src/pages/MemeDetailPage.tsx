@@ -83,7 +83,7 @@ const MemeDetailPage = () => {
           dimensions: null,
           duration: null,
           uploader: {
-            id: String(data.creator?.id ?? ""),
+            id: data.creator?.userId ?? "",  // 계정 ID (문자열)
             nickname: data.creator?.nickname ?? "알 수 없음",
             profileImage: data.creator?.imgUrl ?? "",
           },
@@ -213,11 +213,11 @@ const MemeDetailPage = () => {
     setIsShareOpen(true)
   }
 
-  // // 업로더 클릭
-  // const handleUploaderClick = () => {
-  //   if (!meme) return;
-  //   navigate(`/user/${meme.uploader.id}`);
-  // };
+  // 업로더 클릭
+  const handleUploaderClick = () => {
+    if (!meme) return;
+    navigate(`/user/${meme.uploader.id}`);
+  };
 
   // 로딩 화면
   if (loading || !meme) {
@@ -417,18 +417,18 @@ const MemeDetailPage = () => {
                 업로드한 유저
               </Typography>
               <Box
-                // onClick={handleUploaderClick}
+                onClick={handleUploaderClick}
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
-                  // cursor: "pointer",
+                  cursor: "pointer",
                   p: 2,
                   borderRadius: 3,
                   transition: "all 0.2s ease",
-                  // "&:hover": {
-                  //   bgcolor: "rgba(147, 51, 234, 0.05)",
-                  // },
+                  "&:hover": {
+                    bgcolor: "rgba(147, 51, 234, 0.05)",
+                  },
                 }}
               >
                 <Avatar

@@ -10,9 +10,18 @@ export const fetchMyProfile = async (): Promise<MyUser> => {
 
 // 타 유저 정보 조회
 export const fetchOtherUserProfile = async (
-  userId: string
+  otherUserId: string,
+  myUserIdOrNull?: string | null
 ): Promise<OtherUser> => {
-  const response = await api.get<OtherUser>(`/users/${userId}`);
+  const params: Record<string, string> = {};
+  if (myUserIdOrNull) {
+    params.myUserIdOrNull = myUserIdOrNull;
+  }
+  
+  const response = await api.get<OtherUser>(`/users/${otherUserId}`, {
+    params,
+    skipAuth: true, // JWT 필요 없음 (공개 API)
+  });
   return response.data;
 };
 

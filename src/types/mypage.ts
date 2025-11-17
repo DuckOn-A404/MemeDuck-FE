@@ -19,9 +19,11 @@ export type MyUser = {
 export type OtherUser = {
   userId: string;
   nickname: string;
-  imgUrl?: string;
-  role: "ADMIN" | "USER";
-  bannedTill?: string;
-  isFollowing: boolean;
-  isFollower: boolean;
+  imgUrl?: string | null;
+  following: boolean;  // 백엔드 응답 필드명
+  followerCount: number;
+  followingCount: number;
+  roomList?: any[];  // 방 목록 (선택적)
+  activeRoom?: any | null;  // 활성 방 (선택적)
+  userRank?: UserRank;
 };

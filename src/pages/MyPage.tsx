@@ -540,7 +540,7 @@
 // export default MyPage;
 
 // src/pages/MyPage.tsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -574,7 +574,7 @@ import { fetchMyFavoriteMemes } from '../api/memeFavorite';
 import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
 import NicknameWithRank from '../components/common/NicknameWithRank';
 import RankProgress from '../components/common/RankProgress';
-import { getMyMemes, type MyMemeItem } from '../api/memeService';
+import { fetchUserMemes, type UserMemeItem } from '../api/memeService';
 import ChangePasswordModal from '../components/common/ChangePasswordModal';
 
 // 마이페이지에서 카드에 넘길 형태
@@ -676,22 +676,31 @@ const MyPage = () => {
     }
   }, [isLoaded]);
 
-  // 내가 업로드한 밈 목록 불러오기
+  // 내가 업로드한 밈 목록 불러오기 (새로운 API)
+  const [memesPage, setMemesPage] = useState(1);
+  const [memesTotal, setMemesTotal] = useState(0);
+  const [memesLoading, setMemesLoading] = useState(false);
+  const memesObserverTarget = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const loadMyMemes = async () => {
+      if (!myUser?.userId) return;
+      
       try {
-        const response = await getMyMemes(1, 100); // 페이지 1, 사이즈 100
-        const mapped: UploadedMeme[] = (response.data || []).map((item: MyMemeItem) => ({
+        const response = await fetchUserMemes(myUser.userId, 1, 20);
+        const mapped: UploadedMeme[] = (response.data.items || []).map((item: UserMemeItem) => ({
           id: String(item.memeId),
-          gifUrl: item.imageUrl,
-          tags: [], // API 응답에 tags가 없으므로 빈 배열
-          viewCount: item.usageCnt,
-          likeCount: 0, // API 응답에 없음
-          uploadedAt: item.createdAt,
-          usageCnt: item.usageCnt,
-          downloadCnt: item.downloadCnt,
+          gifUrl: item.memeUrl,
+          tags: [],
+          viewCount: 0,
+          likeCount: 0,
+          uploadedAt: '',
+          usageCnt: 0,
+          downloadCnt: 0,
         }));
         setUploadedMemes(mapped);
+        setMemesPage(1);
+        setMemesTotal(response.data.total);
       } catch (e) {
         console.error('내가 업로드한 밈 로드 실패:', e);
       }
@@ -701,6 +710,60 @@ const MyPage = () => {
       loadMyMemes();
     }
   }, [myUser]);
+
+  // 무한스크롤 - 업로드한 밈 추가 로드
+  const loadMoreMemes = async () => {
+    if (memesLoading || !myUser?.userId) return;
+    if (uploadedMemes.length >= memesTotal) return;
+
+    setMemesLoading(true);
+    try {
+      const nextPage = memesPage + 1;
+      const response = await fetchUserMemes(myUser.userId, nextPage, 20);
+      const mapped: UploadedMeme[] = (response.data.items || []).map((item: UserMemeItem) => ({
+        id: String(item.memeId),
+        gifUrl: item.memeUrl,
+        tags: [],
+        viewCount: 0,
+        likeCount: 0,
+        uploadedAt: '',
+        usageCnt: 0,
+        downloadCnt: 0,
+      }));
+      setUploadedMemes(prev => [...prev, ...mapped]);
+      setMemesPage(nextPage);
+    } catch (error) {
+      console.error('밈 목록 로드 실패:', error);
+    } finally {
+      setMemesLoading(false);
+    }
+  };
+
+  // IntersectionObserver로 무한스크롤 구현
+  useEffect(() => {
+    if (!memesObserverTarget.current) return;
+    if (uploadedMemes.length >= memesTotal) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !memesLoading) {
+          loadMoreMemes();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = memesObserverTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [uploadedMemes.length, memesTotal, memesLoading]);
 
 
   const [isEditing, setIsEditing] = useState(false);
@@ -995,19 +1058,28 @@ const MyPage = () => {
           )}
 
           {currentTab === 1 && uploadedMemes.length > 0 && (
-            <MasonryGrid>
-              {uploadedMemes.map((meme) => (
-                <MemeCard
-                  key={meme.id}
-                  id={meme.id}
-                  gifUrl={meme.gifUrl}
-                  tags={meme.tags}
-                  viewCount={meme.viewCount}
-                  likeCount={meme.likeCount}
-                  isFavorite={false}
-                />
-              ))}
-            </MasonryGrid>
+            <>
+              <MasonryGrid>
+                {uploadedMemes.map((meme) => (
+                  <MemeCard
+                    key={meme.id}
+                    id={meme.id}
+                    gifUrl={meme.gifUrl}
+                    tags={meme.tags}
+                    viewCount={meme.viewCount}
+                    likeCount={meme.likeCount}
+                    isFavorite={false}
+                  />
+                ))}
+              </MasonryGrid>
+              
+              {/* 무한스크롤 트리거 */}
+              {uploadedMemes.length < memesTotal && (
+                <Box ref={memesObserverTarget} sx={{ textAlign: 'center', py: 4 }}>
+                  {memesLoading && <Typography variant="body2" color="text.secondary">로딩 중...</Typography>}
+                </Box>
+              )}
+            </>
           )}
         </Box>
       </Container>
