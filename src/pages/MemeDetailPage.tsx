@@ -25,7 +25,8 @@ import { getMediaInfo, formatDuration } from "../utils/mediaUtils";
 import { useFavoriteMemes } from "../hooks/useFavoriteMemes";
 import { fetchMemeDetail, logMemeUsage } from "../api/memeService";
 import ShareModal from "../components/common/ShareModal";
-
+import { getAccessToken } from "../api/axiosInstance";
+import LoginModal from "../components/common/LoginModal";
 
 type MemeDetail = {
   id: string;
@@ -47,6 +48,10 @@ type MemeDetail = {
 const MemeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const isLoggedIn = !!getAccessToken();
+
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // 좋아요(즐겨찾기)
   const { favoriteIds, toggleFavorite } = useFavoriteMemes();
@@ -177,6 +182,11 @@ const MemeDetailPage = () => {
 
   // 좋아요 토글
   const handleLike = () => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+
     if (!id || !meme) return;
     const already = isFavorited;
     setDisplayLikeCount((prev) => prev + (already ? -1 : 1));
@@ -607,6 +617,8 @@ const MemeDetailPage = () => {
         onClose={() => setIsShareOpen(false)} 
         link={window.location.href} 
       />
+
+      <LoginModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </Box>
   );
 };
