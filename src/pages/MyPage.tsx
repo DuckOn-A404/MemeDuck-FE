@@ -654,15 +654,16 @@ const MyPage = () => {
   const [uploadedMemes, setUploadedMemes] = useState<UploadedMeme[]>([]);
 
   // 마운트 때 한 번, 그리고 훅이 서버 목록을 다 읽어온(isLoaded) 뒤에 한 번 더 가져옴
+  // favoriteIds가 변경될 때마다 목록을 다시 불러옴 (즐겨찾기 추가/제거 시 즉시 반영)
   useEffect(() => {
     const loadFavorites = async () => {
       try {
-        const list = await fetchMyFavoriteMemes(); // [{memeId, memeUrl, tags, ...}]
-        const mapped: FavoriteMemeForPage[] = (list || []).map((item: any) => ({
+        const response = await fetchMyFavoriteMemes(1, 100); // 페이지네이션 지원
+        const mapped: FavoriteMemeForPage[] = (response.items || []).map((item) => ({
           id: String(item.memeId),
           gifUrl: item.memeUrl,
-          tags: item.tags || [],
-          favoritedAt: item.favoritedAt,
+          tags: [],
+          favoritedAt: undefined,
         }));
         setFavoriteMemes(mapped);
       } catch (e) {
@@ -674,7 +675,7 @@ const MyPage = () => {
     if (isLoaded) {
       loadFavorites();
     }
-  }, [isLoaded]);
+  }, [isLoaded, favoriteIds]);
 
   // 내가 업로드한 밈 목록 불러오기 (새로운 API)
   const [memesPage, setMemesPage] = useState(1);

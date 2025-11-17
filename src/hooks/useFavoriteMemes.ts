@@ -96,14 +96,30 @@ export function useFavoriteMemes() {
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // 즐겨찾기 목록을 다시 불러오는 함수
+  const reloadFavorites = useCallback(async () => {
+    try {
+      const response = await fetchMyFavoriteMemes(1, 100);
+      const next = new Set<string>();
+      for (const item of response.items) {
+        if (item?.memeId != null) {
+          next.add(String(item.memeId));
+        }
+      }
+      setFavoriteIds(next);
+    } catch (err) {
+      console.error("failed to reload favorites:", err);
+    }
+  }, []);
+
   // 1) 처음에 내 즐겨찾기 목록 불러오기
   useEffect(() => {
     (async () => {
       try {
-        const list = await fetchMyFavoriteMemes();
-        // 서버가 [{ memeId: 1, ... }] 이렇게 주니까 "1" 이런 식으로 통일
+        const response = await fetchMyFavoriteMemes(1, 100);
+        // 서버가 { items: [{ memeId: 1, memeUrl: "..." }] } 이렇게 주니까 "1" 이런 식으로 통일
         const next = new Set<string>();
-        for (const item of list) {
+        for (const item of response.items) {
           if (item?.memeId != null) {
             next.add(String(item.memeId));
           }
@@ -160,6 +176,7 @@ export function useFavoriteMemes() {
     favoriteIds, // Set<string> (예: "1", "2", "37")
     toggleFavorite,
     isLoaded, // 목록 로딩 끝났는지
+    reloadFavorites, // 즐겨찾기 목록 다시 불러오기
   };
 }
 
