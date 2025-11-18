@@ -49,7 +49,7 @@ const LoginPage = () => {
       <LoginSignupCard>
         {/* 로고 & 문구 */}
         <div className="flex flex-col items-center gap-x-2 mb-10">
-          <img className="h-8" src="/duck.svg" alt="밈덕 로고" />
+          <img className="h-8" src="/logo.svg" alt="밈덕 로고" />
           <p className="text-sm text-gray-600 text-center">
             밈을 공유하고 즐기는 공간
           </p>
@@ -102,13 +102,13 @@ const LoginPage = () => {
           로그인
         </button>
         {/* 구분선 */}
-        <div className="flex items-center my-6 w-full">
+        {/* <div className="flex items-center my-6 w-full">
           <div className="flex-grow h-px bg-gray-300" />
           <span className="px-4 text-sm text-gray-500 whitespace-nowrap">
             또는
           </span>
           <div className="flex-grow h-px bg-gray-300" />
-        </div>
+        </div> */}
         {/* Google 로그인 */}
         {/* <a
           href={`${API_BASE_URL}/oauth2/authorization/google`}
