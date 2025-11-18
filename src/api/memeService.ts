@@ -66,6 +66,31 @@ export const createMemes = async (
 };
 
 /**
+ * 밈 삭제 API
+ * DELETE /api/me/{memeId}
+ *
+ * @param memeId - 삭제할 밈 ID
+ * @returns 삭제된 밈 정보
+ */
+export const deleteMeme = async (memeId: number): Promise<void> => {
+  const response = await api.delete<void>(`/me/${memeId}`);
+  return response.data;
+};
+
+/**
+ * 밈 수정 API
+ * PATCH /api/me/{memeId}
+ *
+ * @param memeId - 수정할 밈 ID
+ * @param tags - 수정할 밈 태그
+ * @returns 수정된 밈 정보
+ */
+export const updateMeme = async (memeId: number, tags: string[]): Promise<void> => {
+  const response = await api.patch(`/me/${memeId}`, { tags });
+  return response.data;
+};
+
+/**
  * 랜덤 밈 조회 API
  * GET /api/memes/random
  * 

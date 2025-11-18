@@ -574,7 +574,7 @@ import { fetchMyFavoriteMemes } from '../api/memeFavorite';
 import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
 import NicknameWithRank from '../components/common/NicknameWithRank';
 import RankProgress from '../components/common/RankProgress';
-import { fetchUserMemes, type UserMemeItem } from '../api/memeService';
+import { fetchUserMemes, deleteMeme, type UserMemeItem } from '../api/memeService';
 import ChangePasswordModal from '../components/common/ChangePasswordModal';
 
 // 마이페이지에서 카드에 넘길 형태
@@ -820,6 +820,38 @@ const MyPage = () => {
     },
     [favoriteIds, toggleFavorite]
   );
+
+  const handleDeleteMeme = async (id: string) => {
+    // 확인 창 띄우기
+    if (!window.confirm('정말 이 밈을 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      console.log('삭제 시도 - 밈 ID:', id);
+
+      // API 호출
+      const response = await deleteMeme(Number(id));
+      console.log('삭제 성공 응답:', response);
+
+      // 화면에서 제거 (상태 업데이트)
+      setUploadedMemes(prev => prev.filter(meme => meme.id !== id));
+
+      alert('밈이 삭제되었습니다.');
+    } catch (error: any) {
+      console.error('삭제 실패 - 전체 에러:', error);
+      console.error('에러 응답:', error.response);
+      console.error('에러 메시지:', error.message);
+
+      const errorMessage = error.response?.data?.message || error.message || '삭제에 실패했습니다.';
+      alert(`삭제 실패: ${errorMessage}`);
+    }
+  };
+
+  const handleEditMeme = (id: string, _currentTags: string[]) => {
+    // 업로드 페이지로 이동 (편집 모드)
+    navigate(`/upload?memeId=${id}`);
+  };
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#FAFAFA' }}>
@@ -1070,6 +1102,9 @@ const MyPage = () => {
                     viewCount={meme.viewCount}
                     likeCount={meme.likeCount}
                     isFavorite={false}
+                    isOwner={true}
+                    onDelete={handleDeleteMeme}
+                    onEdit={handleEditMeme}
                   />
                 ))}
               </MasonryGrid>

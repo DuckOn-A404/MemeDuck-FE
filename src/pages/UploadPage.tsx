@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import {
   Container,
@@ -31,7 +31,7 @@ import {
 import { AxiosError } from 'axios';
 import Header from '../components/layout/Header';
 import { useUserStore } from '../store/useUserStore';
-import { createMemes } from '../api/memeService';
+import { createMemes, updateMeme, fetchMemeDetail } from '../api/memeService';
 
 interface UploadedFile {
   id: string;
@@ -46,6 +46,10 @@ interface UploadedFile {
 const UploadPage = () => {
   const navigate = useNavigate();
   const { myUser } = useUserStore();
+  const [searchParams] = useSearchParams();
+  const memeId = searchParams.get('memeId');
+  const isEditMode = Boolean(memeId);
+
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentGuideStep, setCurrentGuideStep] = useState(0);
@@ -55,6 +59,38 @@ const UploadPage = () => {
     title: string;
     message: string;
   }>({ open: false, title: '', message: '' });
+
+  // 편집 모드: 기존 밈 데이터 불러오기
+  useEffect(() => {
+    if (isEditMode && memeId) {
+      const loadMemeData = async () => {
+        try {
+          const memeDetail = await fetchMemeDetail(Number(memeId));
+          console.log('밈 상세 정보:', memeDetail);
+          console.log('밈 URL:', memeDetail.imageUrl);
+
+          // 편집 모드용 파일 객체 생성 (실제 파일이 아닌 URL만 사용)
+          setUploadedFiles([{
+            id: memeId,
+            file: null as any, // 편집 모드에서는 파일 객체가 필요없음
+            preview: memeDetail.imageUrl || '',
+            progress: 100,
+            status: 'success',
+            tags: memeDetail.tags || [],
+            tagInput: '',
+          }]);
+        } catch (error) {
+          console.error('밈 로드 실패:', error);
+          setErrorDialog({
+            open: true,
+            title: '로드 실패',
+            message: '밈 정보를 불러오는데 실패했습니다.',
+          });
+        }
+      };
+      loadMemeData();
+    }
+  }, [isEditMode, memeId]);
 
   const formatFileName = useCallback((name: string, max = 20) => {
     if (name.length > max) return name.slice(0, max) + '....';
@@ -220,31 +256,41 @@ const UploadPage = () => {
     const allFilesHaveTags = uploadedFiles.every(f => f.tags.length > 0);
     if (uploadedFiles.length === 0 || !allFilesHaveTags) return;
 
-    // 파일 크기 체크 (20MB 제한)
-    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-    const oversizedFile = uploadedFiles.find(f => f.file.size > MAX_FILE_SIZE);
-    
-    if (oversizedFile) {
-      setErrorDialog({
-        open: true,
-        title: '파일 용량 초과',
-        message: `업로드하려는 파일의 용량이 너무 큽니다.\n\n파일 크기: ${(oversizedFile.file.size / 1024 / 1024).toFixed(2)}MB\n최대 허용: 20MB\n\n파일 크기를 줄이거나 더 작은 파일을 선택해주세요.`,
-      });
-      return;
-    }
-
     setIsSubmitting(true);
-    
-    try {
-      // 파일과 태그 배열 준비
-      const files = uploadedFiles.map(f => f.file);
-      const tags = uploadedFiles.map(f => f.tags);
 
-      // API 호출
-      await createMemes(files, tags);
-      
-      // 성공 시 홈으로 이동
-      navigate('/');
+    try {
+      if (isEditMode && memeId) {
+        // 편집 모드: 태그만 업데이트
+        const tags = uploadedFiles[0].tags;
+        await updateMeme(Number(memeId), tags);
+
+        // 성공 시 마이페이지로 이동
+        navigate('/mypage');
+      } else {
+        // 생성 모드: 파일 크기 체크 (20MB 제한)
+        const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+        const oversizedFile = uploadedFiles.find(f => f.file.size > MAX_FILE_SIZE);
+
+        if (oversizedFile) {
+          setErrorDialog({
+            open: true,
+            title: '파일 용량 초과',
+            message: `업로드하려는 파일의 용량이 너무 큽니다.\n\n파일 크기: ${(oversizedFile.file.size / 1024 / 1024).toFixed(2)}MB\n최대 허용: 20MB\n\n파일 크기를 줄이거나 더 작은 파일을 선택해주세요.`,
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
+        // 파일과 태그 배열 준비
+        const files = uploadedFiles.map(f => f.file);
+        const tags = uploadedFiles.map(f => f.tags);
+
+        // API 호출
+        await createMemes(files, tags);
+
+        // 성공 시 홈으로 이동
+        navigate('/');
+      }
     } catch (error) {
       let errorTitle = '업로드 실패';
       let errorMessage = '밈 업로드에 실패했습니다. 다시 시도해주세요.';
@@ -369,8 +415,8 @@ const UploadPage = () => {
               <Sparkles size={40} color="white" />
             </Box>
           </Box>
-          <Typography 
-            variant="h3" 
+          <Typography
+            variant="h3"
             fontWeight={800}
             sx={{
               background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
@@ -379,10 +425,10 @@ const UploadPage = () => {
               mb: 1,
             }}
           >
-            밈 업로드
+            {isEditMode ? '밈 태그 수정' : '밈 업로드'}
           </Typography>
           <Typography variant="body1" color="text.secondary" fontWeight={500}>
-            K-POP 밈을 공유하고 다른 사람들과 함께 즐겨보세요
+            {isEditMode ? '태그를 수정하여 밈을 더 쉽게 찾을 수 있도록 하세요' : 'K-POP 밈을 공유하고 다른 사람들과 함께 즐겨보세요'}
           </Typography>
         </Box>
 
@@ -477,7 +523,7 @@ const UploadPage = () => {
                         >
                           {/* 미리보기 이미지 */}
                           <Box sx={{ position: 'relative', width: '100%', height: '400px', bgcolor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {file.file.type.startsWith('video/') ? (
+                            {file.file && file.file.type && file.file.type.startsWith('video/') ? (
                               <Box
                                 component="video"
                                 src={file.preview}
@@ -500,36 +546,47 @@ const UploadPage = () => {
                                 }}
                               />
                             )}
-                            <IconButton
-                              onClick={() => removeFile(file.id)}
-                              sx={{
-                                position: 'absolute',
-                                top: 8,
-                                right: 8,
-                                bgcolor: 'rgba(0,0,0,0.6)',
-                                color: 'white',
-                                width: 32,
-                                height: 32,
-                                '&:hover': {
-                                  bgcolor: 'rgba(0,0,0,0.8)',
-                                },
-                              }}
-                            >
-                              <X size={18} />
-                            </IconButton>
+                            {!isEditMode && (
+                              <IconButton
+                                onClick={() => removeFile(file.id)}
+                                sx={{
+                                  position: 'absolute',
+                                  top: 8,
+                                  right: 8,
+                                  bgcolor: 'rgba(0,0,0,0.6)',
+                                  color: 'white',
+                                  width: 32,
+                                  height: 32,
+                                  '&:hover': {
+                                    bgcolor: 'rgba(0,0,0,0.8)',
+                                  },
+                                }}
+                              >
+                                <X size={18} />
+                              </IconButton>
+                            )}
                           </Box>
 
                           {/* 파일 정보 */}
                           <Box sx={{ p: 1.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                              <FileVideo size={16} color="#6B7280" />
-                              <Typography variant="body2" fontWeight={600} noWrap sx={{ flex: 1 }} title={file.file.name}>
-                                {formatFileName(file.file.name)}
+                            {!isEditMode && file.file && (
+                              <>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                  <FileVideo size={16} color="#6B7280" />
+                                  <Typography variant="body2" fontWeight={600} noWrap sx={{ flex: 1 }} title={file.file.name}>
+                                    {formatFileName(file.file.name)}
+                                  </Typography>
+                                </Box>
+                                <Typography variant="caption" color="text.secondary">
+                                  {(file.file.size / 1024 / 1024).toFixed(2)} MB
+                                </Typography>
+                              </>
+                            )}
+                            {isEditMode && (
+                              <Typography variant="body2" fontWeight={600} color="text.secondary">
+                                기존 밈
                               </Typography>
-                            </Box>
-                            <Typography variant="caption" color="text.secondary">
-                              {(file.file.size / 1024 / 1024).toFixed(2)} MB
-                            </Typography>
+                            )}
 
                             {/* 업로드 상태 */}
                             {file.status === 'uploading' && (
@@ -836,7 +893,7 @@ const UploadPage = () => {
                       },
                     }}
                   >
-                    {isSubmitting ? '업로드 중...' : '밈 업로드'}
+                    {isSubmitting ? (isEditMode ? '수정 중...' : '업로드 중...') : (isEditMode ? '태그 수정 완료' : '밈 업로드')}
                   </Button>
                 </Box>
 

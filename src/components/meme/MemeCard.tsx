@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardMedia, Chip, IconButton, Box, Fade } from '@mui/material';
-import { Download, Star } from 'lucide-react';
+import { Download, Edit, Star, Trash2 } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import LoginModal from '../common/LoginModal';
 import { logMemeUsage } from '../../api/memeService';
@@ -17,9 +17,13 @@ interface MemeCardProps {
   // 즐겨찾기용 prop 추가하기
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+
+  isOwner?: boolean;
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string, tags: string[]) => void;
 }
 
-const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite }: MemeCardProps) => {
+const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite, isOwner, onDelete, onEdit }: MemeCardProps) => {
   const navigate = useNavigate();
   const { myUser } = useUserStore();
   const [hover, setHover] = useState(false);
@@ -219,6 +223,50 @@ const MemeCard = ({ id, gifUrl, tags, isFavorite, onToggleFavorite }: MemeCardPr
             )}
           </Box>
         </Fade>
+
+        {/* 소유자만 보이는 편집/삭제 버튼 */}
+        {isOwner && (
+          <Fade in={hover}>
+            <Box sx={{ position: 'absolute', bottom: 12, right: 12, display: 'flex', gap: 1, zIndex: 10 }}>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(id, tags);
+                }}
+                sx={{
+                  bgcolor: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  '&:hover': {
+                    bgcolor: '#9333EA',
+                    color: 'white',
+                    transform: 'scale(1.1)',
+                  },
+                }}
+              >
+                <Edit size={16} />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(id);
+                }}
+                sx={{
+                  bgcolor: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  '&:hover': {
+                    bgcolor: '#EF4444',
+                    color: 'white',
+                    transform: 'scale(1.1)',
+                  },
+                }}
+              >
+                <Trash2 size={16} />
+              </IconButton>
+            </Box>
+          </Fade>
+        )}
       </Box>
     </Card>
     
