@@ -141,7 +141,7 @@ const LeaderboardPage = () => {
                       {top3[1].nickname}
                     </Typography>
                     <Chip
-                      label="2위"
+                      label="2nd"
                       size="small"
                       sx={{
                         bgcolor: 'rgba(255, 255, 255, 0.9)',
@@ -196,7 +196,7 @@ const LeaderboardPage = () => {
                       {top3[0].nickname}
                     </Typography>
                     <Chip
-                      label="👑 1위"
+                      label="👑 1st"
                       size="medium"
                       sx={{
                         bgcolor: 'rgba(255, 255, 255, 0.95)',
@@ -252,7 +252,7 @@ const LeaderboardPage = () => {
                       {top3[2].nickname}
                     </Typography>
                     <Chip
-                      label="3위"
+                      label="3rd"
                       size="small"
                       sx={{
                         bgcolor: 'rgba(255, 255, 255, 0.9)',
