@@ -301,21 +301,19 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Container, Box, Typography, CircularProgress } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
-import { useNavigate } from 'react-router-dom';
 import Header from '../components/layout/Header';
 import MemeCard from '../components/meme/MemeCard';
 import MasonryGrid from '../components/meme/MasonryGrid';
-import PopularTags from '../components/tag/PopularTags';
+// import PopularTags from '../components/tag/PopularTags'; // 인기 태그 비활성화
 import { Flame, Sparkles } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { getAccessToken } from '../api/axiosInstance';
 import { getRandomMemes, getTopMemes, type MemeItem } from '../api/memeService';
-import { getTrendingTags } from '../api/tagService';
+// import { getTrendingTags } from '../api/tagService'; // 인기 태그 비활성화
 import { useFavoriteMemes } from '../hooks/useFavoriteMemes';
 
 const HomePage = () => {
   const { myUser, setMyUser } = useUserStore();
-  const navigate = useNavigate();
 
   // 즐겨찾기 훅
   const { favoriteIds, toggleFavorite, isLoaded } = useFavoriteMemes();
@@ -338,34 +336,34 @@ const HomePage = () => {
     loadUserIfLoggedIn();
   }, [myUser, setMyUser]);
 
-  // 인기 태그
-  const [trendingTags, setTrendingTags] = useState<string[]>([]);
-  const [isTagsLoading, setIsTagsLoading] = useState(true);
+  // 인기 태그 - 비활성화 (태그 관리 어려움, 추후 재사용 가능)
+  // const [trendingTags, setTrendingTags] = useState<string[]>([]);
+  // const [isTagsLoading, setIsTagsLoading] = useState(true);
 
-  // 인기 태그 로드
-  useEffect(() => {
-    const loadTrendingTags = async () => {
-      try {
-        setIsTagsLoading(true);
-        const response = await getTrendingTags('HOUR', 8);
-        const tagNames = response.data.map((tag) => tag.tagName);
-        setTrendingTags(tagNames);
-      } catch (error) {
-        console.error('인기 태그 로드 실패:', error);
-        // 실패 시 기본 태그 사용
-        setTrendingTags(['NMIXX', '해원', '릴리', '설윤', '배이', '지우', '규진', 'JYP']);
-      } finally {
-        setIsTagsLoading(false);
-      }
-    };
+  // // 인기 태그 로드
+  // useEffect(() => {
+  //   const loadTrendingTags = async () => {
+  //     try {
+  //       setIsTagsLoading(true);
+  //       const response = await getTrendingTags('HOUR', 8);
+  //       const tagNames = response.data.map((tag) => tag.tagName);
+  //       setTrendingTags(tagNames);
+  //     } catch (error) {
+  //       console.error('인기 태그 로드 실패:', error);
+  //       // 실패 시 기본 태그 사용
+  //       setTrendingTags(['NMIXX', '해원', '릴리', '설윤', '배이', '지우', '규진', 'JYP']);
+  //     } finally {
+  //       setIsTagsLoading(false);
+  //     }
+  //   };
 
-    loadTrendingTags();
-  }, []);
+  //   loadTrendingTags();
+  // }, []);
 
-  const handleTagClick = (tag: string) => {
-    // 태그 클릭 시 검색 페이지로 이동
-    navigate(`/search/${encodeURIComponent(tag)}`);
-  };
+  // const handleTagClick = (tag: string) => {
+  //   // 태그 클릭 시 검색 페이지로 이동
+  //   navigate(`/search/${encodeURIComponent(tag)}`);
+  // };
 
   // 인기 밈 TOP 10 (실제 API)
   const [topMemes, setTopMemes] = useState<MemeItem[]>([]);
@@ -458,20 +456,21 @@ const HomePage = () => {
       <Container
         maxWidth={false}
         sx={{
-          py: 6,
+          pt: 8,
+          pb: 6,
           px: { xs: '5%', sm: '8%', md: '10%' },
           maxWidth: '100%',
         }}
       >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {/* 인기 태그 섹션 */}
-          {isTagsLoading ? (
+          {/* 인기 태그 섹션 - 비활성화 (태그 관리 어려움, 추후 재사용 가능) */}
+          {/* {isTagsLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress size={32} sx={{ color: '#9333EA' }} />
             </Box>
           ) : (
             <PopularTags tags={trendingTags} onTagClick={handleTagClick} />
-          )}
+          )} */}
 
           {/* 인기 밈 TOP 10 */}
           <Box>
