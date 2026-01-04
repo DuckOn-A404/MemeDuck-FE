@@ -1,0 +1,134 @@
+name: MemeDuck FE CI/CD (S3 + CloudFront)
+
+on:
+  pull_request:
+    branches: [ develop, main ]   # PR: build only
+  push:
+    branches: [ develop, main ]   # push: build + deploy
+  workflow_dispatch:
+
+concurrency:
+  group: memeduck-fe-s3-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # -------------------------
+  # PR: build only (dev defaults)
+  # -------------------------
+  pr-build:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci --prefer-offline --no-audit --progress=false
+
+      - name: Build (dev defaults for PR)
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL_MD_DEV }}
+        run: npm run build
+
+      - name: Verify dist exists
+        run: |
+          set -euo pipefail
+          test -d dist || (echo "dist/ not found. Build failed?" && exit 1)
+          ls -al dist | head
+
+  # -------------------------
+  # Push: build + deploy (DEV/PROD)
+  # -------------------------
+  build-deploy:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Figure env (dev/prod) & targets
+        id: vars
+        run: |
+          set -euo pipefail
+          BR="${GITHUB_REF##*/}"
+
+          if [ "$BR" = "main" ]; then
+            echo "env_name=prod" >> $GITHUB_OUTPUT
+            echo "s3_bucket=${{ vars.S3_BUCKET_MD_FE_PROD }}" >> $GITHUB_OUTPUT
+            echo "cf_dist=${{ vars.CF_DISTRIBUTION_ID_MD_FE_PROD }}" >> $GITHUB_OUTPUT
+            echo "api=${{ vars.VITE_API_BASE_URL_MD_PROD }}" >> $GITHUB_OUTPUT
+          else
+            echo "env_name=dev" >> $GITHUB_OUTPUT
+            echo "s3_bucket=${{ vars.S3_BUCKET_MD_FE_DEV }}" >> $GITHUB_OUTPUT
+            echo "cf_dist=${{ vars.CF_DISTRIBUTION_ID_MD_FE_DEV }}" >> $GITHUB_OUTPUT
+            echo "api=${{ vars.VITE_API_BASE_URL_MD_DEV }}" >> $GITHUB_OUTPUT
+          fi
+
+          echo "branch=$BR"
+          echo "env=${{ steps.vars.outputs.env_name || '' }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci --prefer-offline --no-audit --progress=false
+
+      - name: Build
+        env:
+          VITE_API_BASE_URL: ${{ steps.vars.outputs.api }}
+        run: npm run build
+
+      - name: Verify dist exists
+        run: |
+          set -euo pipefail
+          test -d dist || (echo "dist/ not found. Build failed?" && exit 1)
+          ls -al dist | head
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ vars.AWS_REGION_PROD }}
+
+      - name: Verify required vars
+        run: |
+          set -euo pipefail
+          [ -n "${{ steps.vars.outputs.s3_bucket }}" ] || { echo "Missing S3 bucket var"; exit 1; }
+          [ -n "${{ steps.vars.outputs.cf_dist }}" ] || { echo "Missing CloudFront dist id var"; exit 1; }
+
+      # 핵심: dist -> S3 (HTML 제외 장기캐시, HTML은 no-cache)
+      - name: Upload to S3 (assets long-cache, html no-cache)
+        run: |
+          set -euo pipefail
+
+          # 1) 정적 리소스(HTML 제외) 업로드 + 장기 캐시
+          aws s3 sync ./dist "s3://${{ steps.vars.outputs.s3_bucket }}" \
+            --delete \
+            --exclude "*.html" \
+            --cache-control "public,max-age=31536000,immutable"
+
+          # 2) HTML만 no-cache로 다시 업로드(override)
+          find ./dist -name "*.html" -print0 | while IFS= read -r -d '' f; do
+            key="${f#./dist/}"
+            aws s3 cp "$f" "s3://${{ steps.vars.outputs.s3_bucket }}/$key" \
+              --cache-control "no-cache" \
+              --content-type "text/html; charset=utf-8"
+          done
+
+      - name: Invalidate CloudFront cache
+        run: |
+          set -euo pipefail
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ steps.vars.outputs.cf_dist }}" \
+            --paths "/index.html" "/" "/assets/*"
